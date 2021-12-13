@@ -18,13 +18,13 @@
         int BlockSize { get; }
 
         // <summary>
-        // Find a block by its ID.
-        // </summary>
-        IBlockStorage Find(uint blockID);
-
-        // <summary>
         // Allocate new block, extend the length of underlying storage.
         // </summary>
-        IBlockStorage CreateNew();
+        IBlock CreateNew();
+
+        // <summary>
+        // Find a block by its ID.
+        // </summary>
+        IBlock Find(uint blockID);
     }
 }

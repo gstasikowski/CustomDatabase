@@ -37,11 +37,15 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Compile Include="Helpers\LittleEndianByteOrder.cs" />
     <Compile Include="Interfaces\IBlock.cs" />
     <Compile Include="Interfaces\IBlockStorage.cs" />
     <Compile Include="Interfaces\ICowDatabase.cs" />
     <Compile Include="Interfaces\IIndex.cs" />
     <Compile Include="Interfaces\IRecordStorage.cs" />
+    <Compile Include="Logic\Block.cs" />
+    <Compile Include="Logic\BlockStorage.cs" />
+    <Compile Include="Helpers\BufferHelper.cs" />
     <Compile Include="Models\CowModel.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -57,10 +57,10 @@ namespace CustomDatabase.Logic
             // Validate field number
             if (field < 0)
             { throw new IndexOutOfRangeException(); }
-
+            */
             if (field >= (storage.BlockHeaderSize/8))
             { throw new ArgumentException("Invalid field: " + field); }
-            */
+            
 
             // Check (and return) if alread in cache
             if (field < cachedHeaderValue.Length)
@@ -220,8 +220,8 @@ namespace CustomDatabase.Logic
             if (field < 0)
             { throw new IndexOutOfRangeException(); }
 
-            if (field >= (storage.BlockHeaderSize / 8))
-            { throw new ArgumentException("Invalid field: " + field); }
+            //if (field >= (storage.BlockHeaderSize / 8))
+            //{ throw new ArgumentException("Invalid field: " + field); }
         }
         #endregion Methods (private)
 

@@ -46,6 +46,7 @@
     <Compile Include="Logic\Block.cs" />
     <Compile Include="Logic\BlockStorage.cs" />
     <Compile Include="Helpers\BufferHelper.cs" />
+    <Compile Include="Logic\RecordStorage.cs" />
     <Compile Include="Models\CowModel.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

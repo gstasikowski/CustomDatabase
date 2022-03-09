@@ -49,15 +49,8 @@ namespace CustomDatabase.Logic
         #region Methods (public)
         public long GetHeader(int field)
         {
-            ValidateBlock(field); // can replace repeating lines from below?
-            /*
-            if (isDisposed)
-            { throw new ObjectDisposedException("Block"); }
+            ValidateBlock(field); 
 
-            // Validate field number
-            if (field < 0)
-            { throw new IndexOutOfRangeException(); }
-            */
             if (field >= (storage.BlockHeaderSize/8))
             { throw new ArgumentException("Invalid field: " + field); }
             
@@ -78,15 +71,7 @@ namespace CustomDatabase.Logic
 
         public void SetHeader(int field, long value)
         {
-            ValidateBlock(field); // can replace repeating lines from below?
-            /*
-            if (isDisposed)
-            { throw new ObjectDisposedException("Block"); }
-            
-            // Validate field number
-            if (field < 0)
-            { throw new IndexOutOfRangeException(); }
-            */
+            ValidateBlock(field);
 
             // Update cache if this field is cached
             if (field < cachedHeaderValue.Length)
@@ -219,9 +204,6 @@ namespace CustomDatabase.Logic
             // Validate field number
             if (field < 0)
             { throw new IndexOutOfRangeException(); }
-
-            //if (field >= (storage.BlockHeaderSize / 8))
-            //{ throw new ArgumentException("Invalid field: " + field); }
         }
         #endregion Methods (private)
 

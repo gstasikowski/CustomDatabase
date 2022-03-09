@@ -25,7 +25,15 @@ namespace CustomDatabase.Helpers
             return LittleEndianByteOrder.GetUInt32(uintBuffer);
         }
 
-		public static long ReadBufferInt64(byte[] buffer, int bufferOffset)
+        public static int ReadBufferInt32(byte[] buffer, int bufferOffset)
+        {
+            byte[] intBuffer = new byte[4];
+            Buffer.BlockCopy(buffer, bufferOffset, intBuffer, 0, 4);
+
+            return LittleEndianByteOrder.GetInt32(intBuffer);
+        }
+
+        public static long ReadBufferInt64(byte[] buffer, int bufferOffset)
 		{
 			byte[] longBuffer = new byte[8];
 			Buffer.BlockCopy(buffer, bufferOffset, longBuffer, 0, 8);

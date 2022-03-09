@@ -21,7 +21,7 @@ namespace CustomDatabase.Interfaces
         // <summary>
         // Find all entries that contain a key >= to specified one.
         // </summary>
-        IEnumerable<Tuple<K, V>> LargerThanOrEqual(K key);
+        IEnumerable<Tuple<K, V>> LargerThanOrEqualTo(K key);
 
         // <summary>
         // Find all entries that contain a key > than specified one.
@@ -31,7 +31,7 @@ namespace CustomDatabase.Interfaces
         // <summary>
         // Find all entries that contain a key <= than specified one.
         // </summary>
-        IEnumerable<Tuple<K, V>> LessThanOrEqual(K key);
+        IEnumerable<Tuple<K, V>> LessThanOrEqualTo(K key);
 
         // <summary>
         // Find all entries that contain a key < than specified one.

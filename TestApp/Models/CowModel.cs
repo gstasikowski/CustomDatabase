@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CustomDatabase.Models
+namespace TestApp.Models
 {
     public class CowModel
     {

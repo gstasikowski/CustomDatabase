@@ -1,8 +1,8 @@
-﻿using CustomDatabase.Models;
+﻿using TestApp.Models;
 using System;
 using System.Collections.Generic;
 
-namespace CustomDatabase.Interfaces
+namespace TestApp.Interfaces
 {
     public interface ICowDatabase
     {

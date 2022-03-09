@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{4E726DB0-3758-4DE1-9065-9340EBD50F94}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>CustomDatabase</RootNamespace>
     <AssemblyName>CustomDatabase</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -32,22 +32,43 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Compile Include="Exceptions\EndEnumeratingException.cs" />
+    <Compile Include="Exceptions\TreeKeyExistsException.cs" />
+    <Compile Include="Exceptions\TreeNodeSerializationException.cs" />
     <Compile Include="Helpers\LittleEndianByteOrder.cs" />
+    <Compile Include="Helpers\TreeHelper.cs" />
+    <Compile Include="Helpers\TreeTraverseDirection.cs" />
     <Compile Include="Interfaces\IBlock.cs" />
     <Compile Include="Interfaces\IBlockStorage.cs" />
-    <Compile Include="Interfaces\ICowDatabase.cs" />
     <Compile Include="Interfaces\IIndex.cs" />
     <Compile Include="Interfaces\IRecordStorage.cs" />
+    <Compile Include="Interfaces\ISerializer.cs" />
+    <Compile Include="Interfaces\ITreeNodeManager.cs" />
     <Compile Include="Logic\Block.cs" />
     <Compile Include="Logic\BlockStorage.cs" />
     <Compile Include="Helpers\BufferHelper.cs" />
     <Compile Include="Logic\RecordStorage.cs" />
-    <Compile Include="Models\CowModel.cs" />
+    <Compile Include="Logic\StreamExtension.cs" />
+    <Compile Include="Logic\StreamReadWrapper.cs" />
+    <Compile Include="Logic\Tree\Tree.cs" />
+    <Compile Include="Logic\Tree\TreeDiskNodeManager.cs" />
+    <Compile Include="Logic\Tree\TreeEnumerator.cs" />
+    <Compile Include="Logic\Tree\TreeIntSerializer.cs" />
+    <Compile Include="Logic\Tree\TreeLongSerializer.cs" />
+    <Compile Include="Logic\Tree\TreeMemoryNodeManager.cs" />
+    <Compile Include="Logic\Tree\TreeNode.cs" />
+    <Compile Include="Logic\Tree\TreeDiskNodeSerializer.cs" />
+    <Compile Include="Logic\Tree\TreeStringSerializer.cs" />
+    <Compile Include="Logic\Tree\TreeTraverser.cs" />
+    <Compile Include="Logic\Tree\TreeUIntSerializer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

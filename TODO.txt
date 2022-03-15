@@ -1,0 +1,5 @@
+- fix database reconstruction (screws the first part of entry IDs, ex: 8872d8ba-e470-440d-aa9b-071822e8053f -> 00000002-e470-440d-aa9b-071822e8053f)
+- move error handling to a new custom handler
+- move error messages to a centralized place
+- rename region "Getters(/Setters)" to "Properties" in all classes?
+- homogeny region naming convention (with or without region name by the #endregion marker)

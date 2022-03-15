@@ -12,7 +12,7 @@ namespace CustomDatabase.Logic.Tree
         readonly IRecordStorage recordStorage;
         readonly Dictionary<uint, TreeNode<K, V>> dirtyNodes = new Dictionary<uint, TreeNode<K, V>>();
         readonly Dictionary<uint, WeakReference<TreeNode<K, V>>> nodeWeakRefs = new Dictionary<uint, WeakReference<TreeNode<K, V>>>();
-        readonly Queue<TreeNode<K, V>> nodeStrongRefs = new Queue<TreeNode<K, V>>();
+        readonly System.Collections.Queue nodeStrongRefs = new System.Collections.Queue();
         readonly int maxStrongNodeRefs = 200;
         readonly TreeDiskNodeSerializer<K, V> serializer;
         readonly ushort minEntriesPerNode = 36;
@@ -196,9 +196,9 @@ namespace CustomDatabase.Logic.Tree
             nodeStrongRefs.Enqueue(node);
 
             // Clean up strong refs if there are too many of them.
-            if (nodeStrongRefs.Count() >= maxStrongNodeRefs)
+            if (nodeStrongRefs.Count >= maxStrongNodeRefs)
             {
-                while (nodeStrongRefs.Count() >= (maxStrongNodeRefs/2f))
+                while (nodeStrongRefs.Count >= (maxStrongNodeRefs/2f))
                 { nodeStrongRefs.Dequeue(); }
             }
 

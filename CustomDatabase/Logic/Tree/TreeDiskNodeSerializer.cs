@@ -148,10 +148,10 @@ namespace CustomDatabase.Logic.Tree
                 ms.Write(LittleEndianByteOrder.GetBytes((uint)node.ParentID), 0, 4);
 
                 // Next 4 are number of entries.
-                ms.Write(LittleEndianByteOrder.GetBytes((uint)node.EntriesCount), 0, 8);
+                ms.Write(LittleEndianByteOrder.GetBytes((uint)node.EntriesCount), 0, 4);
 
                 // Next 4 are number of children references.
-                ms.Write(LittleEndianByteOrder.GetBytes((uint)node.ChildrenNodeCount), 0, 12);
+                ms.Write(LittleEndianByteOrder.GetBytes((uint)node.ChildrenNodeCount), 0, 4);
 
                 // Writing entries
                 for (int i = 0; i < node.EntriesCount; i++)

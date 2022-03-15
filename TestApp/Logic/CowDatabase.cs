@@ -44,10 +44,10 @@ namespace TestApp.Logic
             );
 
             this.secondaryIndex = new Tree<Tuple<string, int>, uint>(
-                new TreeDiskNodeManager<Tuple<string, int>, uint>(
-                    new StringIntSerializer(),
-                    new TreeUIntSerializer(),
-                    new RecordStorage(new BlockStorage(this.secondaryIndexFile, 4096))
+				new TreeDiskNodeManager<Tuple<string, int>, uint>(
+					new StringIntSerializer(), 
+					new TreeUIntSerializer(), 
+					new RecordStorage(new BlockStorage(this.secondaryIndexFile, 4096))
                     ),
                 true
             );

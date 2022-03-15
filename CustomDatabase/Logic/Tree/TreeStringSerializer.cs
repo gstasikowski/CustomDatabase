@@ -5,7 +5,7 @@ namespace CustomDatabase.Logic.Tree
 {
     public class TreeStringSerializer : ISerializer<string>
     {
-        #region Getters
+        #region Properties
         public bool IsFixedSize
         {
             get { return false; }
@@ -15,7 +15,7 @@ namespace CustomDatabase.Logic.Tree
         {
             get { throw new InvalidOperationException(); }
         }
-        #endregion
+        #endregion Properties
 
         #region Methods (public)
         public string Deserialize(byte[] buffer, int offset, int length)
@@ -27,6 +27,6 @@ namespace CustomDatabase.Logic.Tree
         {
             return System.Text.Encoding.UTF8.GetBytes(value);
         }
-        #endregion
+        #endregion Methods (public)
     }
 }

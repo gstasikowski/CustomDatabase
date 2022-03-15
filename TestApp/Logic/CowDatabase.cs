@@ -17,7 +17,7 @@ namespace TestApp.Logic
         readonly Tree<Tuple<string, int>, uint> secondaryIndex;
         readonly RecordStorage cowRecords;
         readonly CowSerializer cowSerializer = new CowSerializer();
-        #endregion
+        #endregion Variables
 
         #region Constructor
         public CowDatabase(string pathToDBFile)
@@ -52,7 +52,7 @@ namespace TestApp.Logic
                 true
             );
         }
-        #endregion
+        #endregion Constructor
 
         #region Methods (public)
         /// <summary>
@@ -121,7 +121,7 @@ namespace TestApp.Logic
         {
             throw new NotImplementedException();
         }
-        #endregion
+        #endregion Methods (public)
 
         #region Dispose
         bool disposed = false;
@@ -147,6 +147,6 @@ namespace TestApp.Logic
         {
             Dispose(false);
         }
-        #endregion
+        #endregion Dispose
     }
 }

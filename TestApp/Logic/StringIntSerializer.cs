@@ -6,7 +6,7 @@ namespace TestApp.Logic
 {
     public class StringIntSerializer : ISerializer<Tuple<string, int>>
     {
-        #region Getters
+        #region Properties
         public bool IsFixedSize
         {
             get { return false; }
@@ -16,7 +16,7 @@ namespace TestApp.Logic
         {
             get { throw new InvalidOperationException(); }
         }
-        #endregion
+        #endregion Properties
 
         #region Methods (public)
         public Tuple<string, int> Deserialize(byte[] buffer, int offset, int length)
@@ -43,6 +43,6 @@ namespace TestApp.Logic
 
             return data;
         }
-        #endregion
+        #endregion Methods (public)
     }
 }

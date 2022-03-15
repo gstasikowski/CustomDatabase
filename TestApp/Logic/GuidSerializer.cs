@@ -6,7 +6,7 @@ namespace TestApp.Logic
 {
     public class GuidSerializer : ISerializer<Guid>
     {
-        #region Getters
+        #region Properties
         public bool IsFixedSize
         {
             get { return true; }
@@ -16,7 +16,7 @@ namespace TestApp.Logic
         {
             get { return 16; }
         }
-        #endregion
+        #endregion Properties
 
         #region Methods (public)
         public Guid Deserialize(byte[] buffer, int offset, int length)
@@ -31,6 +31,6 @@ namespace TestApp.Logic
         {
             return value.ToByteArray();
         }
-        #endregion
+        #endregion Methods (public)
     }
 }

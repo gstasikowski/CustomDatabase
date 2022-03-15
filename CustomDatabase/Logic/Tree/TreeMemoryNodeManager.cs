@@ -14,9 +14,9 @@ namespace CustomDatabase.Logic.Tree
 
         int idCounter = 1;
         TreeNode<K, V> rootNode;
-        #endregion
+        #endregion Variables
 
-        #region Getters
+        #region Properties
         public ushort MinEntriesPerNode
         {
             get { return minEntriesCountPerNode; }
@@ -36,7 +36,7 @@ namespace CustomDatabase.Logic.Tree
         {
             get { return rootNode; }
         }
-        #endregion
+        #endregion Properties
 
         #region Constructor
         /// <param name="minEntriesCountPerNode">Multiplied by 2 is the degree of the tree.</param>
@@ -50,7 +50,7 @@ namespace CustomDatabase.Logic.Tree
 
             this.rootNode = Create(null, null);
         }
-        #endregion
+        #endregion Constructor
 
         #region Methods (public)
         public TreeNode<K, V> Create(IEnumerable<Tuple<K, V>> entries, IEnumerable<uint> childrenIDs)
@@ -102,6 +102,6 @@ namespace CustomDatabase.Logic.Tree
         {
             // dummy method
         }
-        #endregion
+        #endregion Methods (public)
     }
 }

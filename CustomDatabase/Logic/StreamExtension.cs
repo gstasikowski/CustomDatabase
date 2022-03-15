@@ -126,7 +126,7 @@ namespace CustomDatabase.Logic
                 { return; }
             }
         }
-        #endregion
+        #endregion Methods (public)
 
         #region Methods (Expect_)
         /// <summary>
@@ -214,6 +214,6 @@ namespace CustomDatabase.Logic
             else
             { throw new EndOfStreamException(); }
         }
-        #endregion
+        #endregion Methods (Expect_)
     }
 }

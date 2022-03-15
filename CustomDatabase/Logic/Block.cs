@@ -19,13 +19,13 @@ namespace CustomDatabase.Logic
 
         public event EventHandler Disposed;
         #endregion Variables
-
-        #region Getter
+        
+        #region Properties
         public uint ID
         {
             get { return id; }
         }
-        #endregion Getter
+        #endregion Properties
 
         #region Constructor
         public Block(BlockStorage storage, uint id, byte[] firstSector, Stream stream)
@@ -89,7 +89,7 @@ namespace CustomDatabase.Logic
 
             // Validate argument
             if (false == ((count >= 0) && ((count + srcOffset) <= storage.BlockContentSize)))
-            { throw new ArgumentOutOfRangeException("Requested count is outside of src bounds. Count: " + count, "count"); }
+            { throw new ArgumentOutOfRangeException("Requested count is outside of src bounds. Count: " + count, "count"); } // TODO move error handling to a centralized place
 
             if (false == ((count + dstOffset) <= dst.Length))
             { throw new ArgumentOutOfRangeException("Requested count is outside dest bounds. Count: " + count); }

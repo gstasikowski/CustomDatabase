@@ -16,7 +16,7 @@ namespace CustomDatabase.Logic
         readonly Dictionary<uint, Block> blocks = new Dictionary<uint, Block>();
         #endregion Variables
 
-        #region Getters
+        #region Properties
         public int BlockContentSize
         {
             get { return blockContentSize; }
@@ -36,7 +36,7 @@ namespace CustomDatabase.Logic
         {
             get { return unitOfWork; }
         }
-        #endregion Methods
+        #endregion Properties
 
         #region Constructors
         public BlockStorage(Stream storage, int blockSize = 40960, int blockHeaderSize = 48)

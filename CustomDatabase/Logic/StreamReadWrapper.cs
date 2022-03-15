@@ -13,9 +13,9 @@ namespace CustomDatabase.Logic
         readonly Stream _parent;
         long _readLimit;
         long _position = 0;
-        #endregion
+        #endregion Variables
 
-        #region Getters/Setters
+        #region Properties
         public override long Position 
         {
             get { return _position; }
@@ -41,7 +41,7 @@ namespace CustomDatabase.Logic
         {
             get { return false; }
         }
-        #endregion
+        #endregion Properties
 
         #region Constructor
         public StreamReadWrapper(Stream target, long readLimit)
@@ -49,7 +49,7 @@ namespace CustomDatabase.Logic
             _parent = target;
             _readLimit = readLimit;
         }
-        #endregion
+        #endregion Constructor
 
         #region Methods (public)
         public override void Flush()
@@ -83,6 +83,6 @@ namespace CustomDatabase.Logic
         {
             throw new NotImplementedException();
         }
-        #endregion
+        #endregion Methods (public)
     }
 }

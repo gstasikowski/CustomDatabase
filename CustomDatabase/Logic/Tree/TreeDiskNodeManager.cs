@@ -19,9 +19,9 @@ namespace CustomDatabase.Logic.Tree
                 
         TreeNode<K, V> rootNode;
         int cleanupCounter = 0;
-        #endregion
+        #endregion Variables
 
-        #region Getters/Setters
+        #region Properties
         public ushort MinEntriesPerNode
         {
             get { return minEntriesPerNode; }
@@ -43,7 +43,7 @@ namespace CustomDatabase.Logic.Tree
         {
             get { return rootNode; }
         }
-        #endregion
+        #endregion Properties
 
         #region Constructors
         /// <summary>
@@ -85,7 +85,7 @@ namespace CustomDatabase.Logic.Tree
             else
             { this.rootNode = CreateFirstRoot(); }
         }
-        #endregion
+        #endregion Constructors
 
         #region Methods (public)
         public TreeNode<K, V> Create(IEnumerable<Tuple<K, V>> entries, IEnumerable<uint> childrenIDs)
@@ -175,7 +175,7 @@ namespace CustomDatabase.Logic.Tree
 
             dirtyNodes.Clear();
         }
-        #endregion
+        #endregion Methods (public)
 
         #region Methods (private)
         TreeNode<K, V> CreateFirstRoot()
@@ -222,6 +222,6 @@ namespace CustomDatabase.Logic.Tree
                 }
             }
         }
-        #endregion
+        #endregion Methods (private)
     }
 }

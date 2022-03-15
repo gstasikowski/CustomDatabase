@@ -6,7 +6,7 @@ namespace CustomDatabase.Logic.Tree
 {
     public class TreeUIntSerializer : ISerializer<uint>
     {
-        #region Getters
+        #region Properties
         public bool IsFixedSize
         {
             get { return true; }
@@ -16,10 +16,9 @@ namespace CustomDatabase.Logic.Tree
         {
             get { return 4; }
         }
-        #endregion
+        #endregion Properties
 
         #region Methods(public)
-        
         public uint Deserialize(byte[] buffer, int offset, int length)
         {
             if (length != 4)
@@ -32,6 +31,6 @@ namespace CustomDatabase.Logic.Tree
         {
             return LittleEndianByteOrder.GetBytes(value);
         }
-        #endregion
+        #endregion Methods(public)
     }
 }

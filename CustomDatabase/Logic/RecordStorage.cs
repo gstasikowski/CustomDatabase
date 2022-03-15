@@ -17,7 +17,7 @@ namespace CustomDatabase.Logic
         const int kBlockContentLength = 2;
         const int kPreviousBlockID = 3;
         const int kIsDeleted = 4;
-        #endregion
+        #endregion Variables
 
         #region Constructor
         public RecordStorage (IBlockStorage storage)
@@ -30,7 +30,7 @@ namespace CustomDatabase.Logic
             if (storage.BlockHeaderSize < 48)
             { throw new ArgumentException("Record storage needs at least 48 header bytes."); }
         }
-        #endregion
+        #endregion Constructor
 
         #region Methods (public)
         public virtual byte[] Find(uint recordID)
@@ -264,7 +264,7 @@ namespace CustomDatabase.Logic
                 { block.Dispose(); }
             }
         }
-        #endregion
+        #endregion Methods (public)
 
         #region Methods (private)
         /// <summary>
@@ -491,6 +491,6 @@ namespace CustomDatabase.Logic
                 }
             }
         }
-        #endregion
+        #endregion Methods (private)
     }
 }

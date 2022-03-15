@@ -11,7 +11,7 @@ namespace CustomDatabase.Logic.Tree
         #region Variables
         readonly ITreeNodeManager<K, V> nodeManager;
         readonly bool allowDuplicateKeys;
-        #endregion
+        #endregion Variables
 
         #region Constructor
         public Tree(ITreeNodeManager<K, V> nodeManager, bool allowDuplicateKeys)
@@ -22,7 +22,7 @@ namespace CustomDatabase.Logic.Tree
             this.nodeManager = nodeManager;
             this.allowDuplicateKeys = allowDuplicateKeys;
         }
-        #endregion
+        #endregion Constructor
 
         #region Methods (public)
         /// <summary>
@@ -203,7 +203,7 @@ namespace CustomDatabase.Logic.Tree
                 (startIterationIndex >= 0) ? startIterationIndex : ~startIterationIndex,
                 TreeTraverseDirection.Descending);
         }
-        #endregion
+        #endregion Methods (public)
 
         #region Methods (private)
         /// <summary>
@@ -300,6 +300,6 @@ namespace CustomDatabase.Logic.Tree
         {
             return FindNodeForInsertion(key, nodeManager.RootNode, ref insertionIndex);
         }
-        #endregion
+        #endregion Methods (private)
     }
 }

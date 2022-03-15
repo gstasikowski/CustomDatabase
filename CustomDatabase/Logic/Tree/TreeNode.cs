@@ -14,7 +14,7 @@ namespace CustomDatabase.Logic.Tree
         protected readonly ITreeNodeManager<K, V> nodeManager;
         protected readonly List<uint> childrenIDs;
         protected readonly List<Tuple<K, V>> entries;
-        #endregion
+        #endregion Variables
 
         #region Properties
         public K MaxKey
@@ -108,7 +108,7 @@ namespace CustomDatabase.Logic.Tree
             if (childrenIDs != null)
             { this.childrenIDs.AddRange(childrenIDs); }
         }
-        #endregion
+        #endregion Constructor
 
         #region Methods (public)
         /// <summary>
@@ -379,7 +379,7 @@ namespace CustomDatabase.Logic.Tree
                     );
             }
         }
-        #endregion
+        #endregion Methods (public)
 
         #region Methods (private)
         /// <summary>
@@ -503,6 +503,6 @@ namespace CustomDatabase.Logic.Tree
                 nodeManager.MarkAsChanged(parent);
             }
         }
-        #endregion
+        #endregion Methods (private)
     }
 }

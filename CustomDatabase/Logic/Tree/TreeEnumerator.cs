@@ -16,9 +16,9 @@ namespace CustomDatabase.Logic.Tree
         int currentEntry = 0;
         TreeNode<K, V> currentNode;
         Tuple<K, V> current;
-        #endregion
+        #endregion Variables
 
-        #region Getters
+        #region Properties
         public TreeNode<K, V> CurrentNode
         {
             get { return currentNode; }
@@ -38,7 +38,7 @@ namespace CustomDatabase.Logic.Tree
         {
             get { return current; }
         }
-        #endregion
+        #endregion Properties
 
         #region Constructor
         public TreeEnumerator(ITreeNodeManager<K, V> nodeManager,
@@ -51,7 +51,7 @@ namespace CustomDatabase.Logic.Tree
             this.currentEntry = fromIndex;
             this.direction = direction;
         }
-        #endregion
+        #endregion Constructor
 
         #region Methods (public)
         public bool MoveNext()
@@ -180,6 +180,6 @@ namespace CustomDatabase.Logic.Tree
 
         public void Dispose()
         { }
-        #endregion
+        #endregion Methods (public)
     }
 }

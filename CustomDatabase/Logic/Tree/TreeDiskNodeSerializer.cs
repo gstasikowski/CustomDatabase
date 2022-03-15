@@ -11,7 +11,7 @@ namespace CustomDatabase.Logic.Tree
         ISerializer<K> keySerializer;
         ISerializer<V> valueSerializer;
         ITreeNodeManager<K, V> nodeManager;
-        #endregion
+        #endregion Variables
 
         #region Constructor
         public TreeDiskNodeSerializer(ITreeNodeManager<K, V> nodeManager,
@@ -31,7 +31,7 @@ namespace CustomDatabase.Logic.Tree
             this.keySerializer = keySerializer;
             this.valueSerializer = valueSerializer;
         }
-        #endregion
+        #endregion Constructor
 
         #region Methods (public)
         /// <summary>
@@ -62,7 +62,7 @@ namespace CustomDatabase.Logic.Tree
             else
             { throw new NotSupportedException(); }
         }
-        #endregion
+        #endregion Methods (public)
 
         #region Methods (private)
         byte[] FixedLengthSerialize(TreeNode<K, V> node)
@@ -212,6 +212,6 @@ namespace CustomDatabase.Logic.Tree
 
             return new TreeNode<K, V>(nodeManager, assignID, parentID, entries, children);
         }
-        #endregion
+        #endregion Methods (private)
     }
 }

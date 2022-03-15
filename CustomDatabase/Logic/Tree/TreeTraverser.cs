@@ -13,7 +13,7 @@ namespace CustomDatabase.Logic.Tree
         readonly int fromIndex;
         readonly TreeTraverseDirection direction;
         readonly ITreeNodeManager<K, V> nodeManager;
-        #endregion
+        #endregion Variables
 
         #region Constructor
         public TreeTraverser(ITreeNodeManager<K, V> nodeManager,
@@ -29,9 +29,9 @@ namespace CustomDatabase.Logic.Tree
             this.fromIndex = fromIndex;
             this.direction = direction;
         }
-        #endregion
+        #endregion Constructor
 
-        #region Getters
+        #region Properties
         public IEnumerator<Tuple<K, V>> GetEnumerator()
         {
             return new TreeEnumerator<K, V>(nodeManager, fromNode, fromIndex, direction);
@@ -41,6 +41,6 @@ namespace CustomDatabase.Logic.Tree
         {
             return ((IEnumerable<Tuple<K, V>>)this).GetEnumerator();
         }
-        #endregion
+        #endregion Properties
     }
 }

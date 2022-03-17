@@ -57,17 +57,16 @@ namespace TestApp
 					Console.WriteLine("Inserted 2 cows");
 				}
 
-				// TODO fix database reconstruction (screws the first part of entry IDs, ex: 8872d8ba-e470-440d-aa9b-071822e8053f -> 00000002-e470-440d-aa9b-071822e8053f)
 				// Reconstruct the database, to demonstrate that cow data is persistent
 				using (var db = new CowDatabase(dbFile))
 				{
 					// Find a cow by ID, 
 					// This uses the primary index so the query is an ad-hoc query.
 					// this should return a Labrador.
-					Console.WriteLine("Found cow by ID: " + db.Find(Guid.Parse("8872d8ba-e470-440d-aa9b-071822e8053f")).ID);
+					Console.WriteLine("\nFound cow by ID: " + db.Find(Guid.Parse("8872d8ba-e470-440d-aa9b-071822e8053f")).ID);
 
 					// Find cows that belongs to the Labrador breed
-					Console.WriteLine("Labrador cows, 18 years old: ");
+					Console.WriteLine("\nLabrador cows, 18 years old: ");
 					foreach (var row in db.FindBy(breed: "Labrador", age: 18))
 					{
 						string cowData = string.Format("ID: {0}, Name: {1}", row.ID, row.Name);

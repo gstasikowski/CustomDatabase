@@ -90,7 +90,7 @@ namespace CustomDatabase.Logic.Tree
                 var entry = node.GetEntry(i);
 
                 Buffer.BlockCopy(this.keySerializer.Serialize(entry.Item1), 0, buffer, 12 + (i * entrySize), this.keySerializer.Length);
-                Buffer.BlockCopy(this.valueSerializer.Serialize(entry.Item2), 0, buffer, 12 + (i * entrySize), this.valueSerializer.Length);
+                Buffer.BlockCopy(this.valueSerializer.Serialize(entry.Item2), 0, buffer, 12 + (i * entrySize) + this.keySerializer.Length, this.valueSerializer.Length);
             }
 
             // Writing children refs

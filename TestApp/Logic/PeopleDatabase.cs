@@ -7,20 +7,20 @@ using TestApp.Models;
 
 namespace TestApp.Logic
 {
-    class CowDatabase : IDisposable
+    class PeopleDatabase : IDisposable
     {
         #region Variables
         readonly Stream mainDatabaseFile;
         readonly Stream primaryIndexFile;
         readonly Stream secondaryIndexFile;
         readonly Tree<Guid, uint> primaryIndex;
-        readonly Tree<Tuple<string, int>, uint> secondaryIndex;
-        readonly RecordStorage cowRecords;
-        readonly CowSerializer cowSerializer = new CowSerializer();
+        readonly Tree<Tuple<string, string>, uint> secondaryIndex;
+        readonly RecordStorage peopleRecords;
+        readonly PersonSerializer personSerializer = new PersonSerializer();
         #endregion Variables
 
         #region Constructor
-        public CowDatabase(string pathToDBFile)
+        public PeopleDatabase(string pathToDBFile)
         {
             if (pathToDBFile == null)
             { throw new ArgumentNullException("pathToDBFile"); }
@@ -31,7 +31,7 @@ namespace TestApp.Logic
             this.secondaryIndexFile = new FileStream(pathToDBFile + ".sidx", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096);
 
             // Create a RecordStorage for main cow data
-            this.cowRecords = new RecordStorage(new BlockStorage(this.mainDatabaseFile, 4096, 48));
+            this.peopleRecords = new RecordStorage(new BlockStorage(this.mainDatabaseFile, 4096, 48));
 
             // Create the indexes
             this.primaryIndex = new Tree<Guid, uint>(
@@ -43,9 +43,9 @@ namespace TestApp.Logic
                 false
             );
 
-            this.secondaryIndex = new Tree<Tuple<string, int>, uint>(
-				new TreeDiskNodeManager<Tuple<string, int>, uint>(
-					new StringIntSerializer(), 
+            this.secondaryIndex = new Tree<Tuple<string, string>, uint>(
+				new TreeDiskNodeManager<Tuple<string, string>, uint>(
+					new StringSerializer(), 
 					new TreeUIntSerializer(), 
 					new RecordStorage(new BlockStorage(this.secondaryIndexFile, 4096))
                     ),
@@ -58,10 +58,10 @@ namespace TestApp.Logic
         /// <summary>
         /// Update entry.
         /// </summary>
-        public void Update(CowModel cow)
+        public void Update(PersonModel person)
         {
             if (disposed)
-            { throw new ObjectDisposedException("CowDatabase"); }
+            { throw new ObjectDisposedException("PeopleDatabase"); }
 
             throw new NotImplementedException();
         }
@@ -69,40 +69,40 @@ namespace TestApp.Logic
         /// <summary>
         /// Insert new entry into database.
         /// </summary>
-        public void Insert(CowModel cow)
+        public void Insert(PersonModel person)
         {
             if (disposed)
-            { throw new ObjectDisposedException("CowDatabase"); }
+            { throw new ObjectDisposedException("PeopleDatabase"); }
 
-            var recordID = this.cowRecords.Create(this.cowSerializer.Serialize(cow));
+            var recordID = this.peopleRecords.Create(this.personSerializer.Serialize(person));
 
-            this.primaryIndex.Insert(cow.ID, recordID);
-            this.secondaryIndex.Insert(new Tuple<string, int>(cow.Breed, cow.Age), recordID);
+            this.primaryIndex.Insert(person.ID, recordID);
+            this.secondaryIndex.Insert(new Tuple<string, string>(person.FirstName, person.LastName), recordID);
         }
 
         /// <summary>
         /// Find an entry by ID.
         /// </summary>
-        public CowModel Find(Guid ID)
+        public PersonModel Find(Guid ID)
         {
             if (disposed)
-            { throw new ObjectDisposedException("CowDatabase"); }
+            { throw new ObjectDisposedException("PeopleDatabase"); }
 
             var entry = this.primaryIndex.Get(ID);
 
             if (entry == null)
             { return null; }
 
-            return this.cowSerializer.Deserialize(this.cowRecords.Find(entry.Item2));
+            return this.personSerializer.Deserialize(this.peopleRecords.Find(entry.Item2));
         }
 
         /// <summary>
         /// Find all entries within parameteres.
         /// </summary>
-        public IEnumerable<CowModel> FindBy(string breed, int age)
+        public IEnumerable<PersonModel> FindBy(string firstName, string lastName)
         {
-            var comparer = Comparer<Tuple<string, int>>.Default;
-            var searchKey = new Tuple<string, int>(breed, age);
+            var comparer = Comparer<Tuple<string, string>>.Default;
+            var searchKey = new Tuple<string, string>(firstName, lastName);
 
             foreach (var entry in this.secondaryIndex.LargerThanOrEqualTo(searchKey))
             {
@@ -110,14 +110,27 @@ namespace TestApp.Logic
                 if (comparer.Compare(entry.Item1, searchKey) > 0)
                 { break; }
 
-                yield return this.cowSerializer.Deserialize(this.cowRecords.Find(entry.Item2));
+                yield return this.personSerializer.Deserialize(this.peopleRecords.Find(entry.Item2));
+            }
+        }
+
+        /// <summary>
+        /// Get all entries.
+        /// </summary>
+        public IEnumerable<PersonModel> GetAll()
+        {
+            var elements = this.primaryIndex.GetAll();
+
+            foreach (var entry in elements)
+            {
+                yield return this.personSerializer.Deserialize(this.peopleRecords.Find(entry.Item2));
             }
         }
 
         /// <summary>
         /// Delete specified entry from database.
         /// </summary>
-        public void Delete(CowModel cow)
+        public void Delete(PersonModel cow)
         {
             throw new NotImplementedException();
         }
@@ -143,7 +156,7 @@ namespace TestApp.Logic
             }
         }
 
-        ~CowDatabase()
+        ~PeopleDatabase()
         {
             Dispose(false);
         }

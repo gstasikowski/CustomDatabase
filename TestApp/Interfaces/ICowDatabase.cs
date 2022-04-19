@@ -6,10 +6,10 @@ namespace TestApp.Interfaces
 {
     public interface ICowDatabase
     {
-        void Insert(CowModel cow);
-        void Delete(CowModel cow);
-        void Update(CowModel cow);
-        CowModel Find(Guid ID);
-        IEnumerable<CowModel> FindBy(string breed, int age);
+        void Insert(PersonModel cow);
+        void Delete(PersonModel cow);
+        void Update(PersonModel cow);
+        PersonModel Find(Guid ID);
+        IEnumerable<PersonModel> FindBy(string breed, int age);
     }
 }

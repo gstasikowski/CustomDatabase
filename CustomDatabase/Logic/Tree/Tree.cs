@@ -141,6 +141,14 @@ namespace CustomDatabase.Logic.Tree
         }
 
         /// <summary>
+        /// Get all entries in the database.
+        /// </summary>
+        public IEnumerable<Tuple<K, V>> GetAll()
+        {
+            return nodeManager.RootNode.Entries;
+        }
+
+        /// <summary>
         /// Search for all elements >= to given key.
         /// </summary>
         /// <param name="key"></param>

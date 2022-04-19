@@ -51,12 +51,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Logic\CowDatabase.cs" />
+    <Compile Include="Logic\PeopleDatabase.cs" />
     <Compile Include="Interfaces\ICowDatabase.cs" />
-    <Compile Include="Logic\CowSerializer.cs" />
+    <Compile Include="Logic\PersonSerializer.cs" />
     <Compile Include="Logic\GuidSerializer.cs" />
     <Compile Include="Logic\StringIntSerializer.cs" />
-    <Compile Include="Models\CowModel.cs" />
+    <Compile Include="Logic\StringSerializer.cs" />
+    <Compile Include="Models\PersonModel.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
   <ItemGroup>

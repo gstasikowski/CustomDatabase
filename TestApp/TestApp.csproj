@@ -52,7 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Logic\PeopleDatabase.cs" />
-    <Compile Include="Interfaces\ICowDatabase.cs" />
+    <Compile Include="Interfaces\IPeopleDatabase.cs" />
     <Compile Include="Logic\PersonSerializer.cs" />
     <Compile Include="Logic\GuidSerializer.cs" />
     <Compile Include="Logic\StringIntSerializer.cs" />

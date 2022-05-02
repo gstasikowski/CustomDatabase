@@ -27,8 +27,6 @@ namespace TestApp.Logic
             { throw new Exception("Invalid string length: " + stringLength); }
 
             var stringValue = System.Text.Encoding.UTF8.GetString(buffer, offset + 4, stringLength);
-            //var intValue = BufferHelper.ReadBufferInt32(buffer, offset + 4 + stringLength);
-
             var stringLength2 = BufferHelper.ReadBufferInt32(buffer, offset + 4 + stringLength);
 
             if (stringLength2 < 0 || stringLength2 > (16 * 1024))
@@ -47,9 +45,8 @@ namespace TestApp.Logic
 
             BufferHelper.WriteBuffer((int)stringBytes.Length, data, 0);
             Buffer.BlockCopy(src: stringBytes, srcOffset: 0, dst: data, dstOffset: 4, count: stringBytes.Length);
-            //BufferHelper.WriteBuffer((int)value.Item2, data, 4 + stringBytes.Length);
             BufferHelper.WriteBuffer((int)stringBytes2.Length, data, 4 + stringBytes.Length);
-            Buffer.BlockCopy(src: stringBytes2, srcOffset: 0, dst: data, dstOffset: 4 + stringBytes.Length + 4, count: stringBytes.Length);
+            Buffer.BlockCopy(src: stringBytes2, srcOffset: 0, dst: data, dstOffset: 4 + stringBytes.Length + 4, count: stringBytes2.Length);
 
             return data;
         }

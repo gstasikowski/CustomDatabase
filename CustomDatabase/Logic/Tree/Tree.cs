@@ -94,6 +94,7 @@ namespace CustomDatabase.Logic.Tree
                 if (enumerator.MoveNext() && nodeManager.KeyComparer.Compare(enumerator.Current.Item1, key) == 0)
                 {
                     enumerator.CurrentNode.Remove(enumerator.CurrentEntry);
+                    nodeManager.SaveChanges();
                     return true;
                 }
             }

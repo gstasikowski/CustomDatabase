@@ -10,7 +10,7 @@ namespace TestApp
         public static void Main(string[] args)
         {
 			// It's a test app so put the db file in a temp folder.
-            var dbFile = Path.Combine(AppContext.BaseDirectory, "people.data");
+            string dbFile = Path.Combine(AppContext.BaseDirectory, "people.data");
 
 			ShowMenu(dbFile);
 		}
@@ -42,6 +42,8 @@ namespace TestApp
 
 				case "5":
 					ClearDBFiles(dbFile);
+					Console.WriteLine("\nPress key to continue...");
+					Console.ReadKey();
 					break;
 
 				case "6":

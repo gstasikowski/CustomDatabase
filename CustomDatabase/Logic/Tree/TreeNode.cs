@@ -238,12 +238,12 @@ namespace CustomDatabase.Logic.Tree
         /// </summary>
         public void Split(out TreeNode<K, V> outLeftNode, out TreeNode<K, V> outRightNode)
         {
-            var halfCount = this.nodeManager.MinEntriesPerNode;
+            ushort halfCount = this.nodeManager.MinEntriesPerNode;
             var middleEntry = entries[halfCount];
 
             // Create a new node to hold all values larger then the middle one
             var rightEntries = new Tuple<K, V>[halfCount];
-            var rightChildren = (uint[])null;
+            uint[] rightChildren = null;
 
             entries.CopyTo(halfCount + 1, rightEntries, 0, rightEntries.Length);
 
@@ -258,7 +258,7 @@ namespace CustomDatabase.Logic.Tree
             // Update ParentID property for moved children nodes
             if (rightChildren != null)
             {
-                foreach (var childID in rightChildren)
+                foreach (uint childID in rightChildren)
                 { nodeManager.Find(childID).ParentID = newRightNode.ID; }
             }
 
@@ -334,30 +334,30 @@ namespace CustomDatabase.Logic.Tree
         /// <summary>
         /// Get a child node by its internal position to this node.
         /// </summary>
-        public TreeNode<K, V> GetChildNode(int atIndex)
+        public TreeNode<K, V> GetChildNode(int index)
         {
-            return nodeManager.Find(childrenIDs[atIndex]);
+            return nodeManager.Find(childrenIDs[index]);
         }
 
         /// <summary>
         /// Get a Key-Value entry inside this node.
         /// </summary>
-        public Tuple<K, V> GetEntry(int atIndex)
+        public Tuple<K, V> GetEntry(int index)
         {
-            return entries[atIndex];
+            return entries[index];
         }
 
         /// <summary>
         /// Check if entry at specified index exists.
         /// </summary>
-        public bool EntryExists(int atIndex)
+        public bool EntryExists(int index)
         {
-            return atIndex < entries.Count;
+            return index < entries.Count;
         }
 
         public override string ToString()
         {
-            var numbers = (from tuple in this.entries select tuple.Item1.ToString()).ToArray();
+            string[] numbers = (from tuple in this.entries select tuple.Item1.ToString()).ToArray();
 
             if (IsLeaf)
             {
@@ -389,7 +389,7 @@ namespace CustomDatabase.Logic.Tree
         {
             // If deficient node's right sibling exists and has more than minimum
             // number of elements, rotate left.
-            var indexInParent = IndexInParent();
+            int indexInParent = IndexInParent();
             var parent = nodeManager.Find(parentID);
             var rightSibling = ((indexInParent + 1) < parent.ChildrenNodeCount) ? parent.GetChildNode(indexInParent + 1) : null;
 
@@ -407,10 +407,10 @@ namespace CustomDatabase.Logic.Tree
                 // Move the first child reference from right sibling.
                 if (!rightSibling.IsLeaf)
                 {
-                    var n = nodeManager.Find(rightSibling.childrenIDs[0]);
+                    var node = nodeManager.Find(rightSibling.childrenIDs[0]);
 
-                    n.parentID = this.ID;
-                    nodeManager.MarkAsChanged(n);
+                    node.parentID = this.ID;
+                    nodeManager.MarkAsChanged(node);
 
                     childrenIDs.Add(rightSibling.childrenIDs[0]);
                     rightSibling.childrenIDs.RemoveAt(0);
@@ -440,10 +440,10 @@ namespace CustomDatabase.Logic.Tree
                 // Move the last child reference from left sibling.
                 if (!leftSibling.IsLeaf)
                 {
-                    var n = nodeManager.Find(leftSibling.childrenIDs[leftSibling.entries.Count - 1]);
+                    var node = nodeManager.Find(leftSibling.childrenIDs[leftSibling.entries.Count - 1]);
 
-                    n.parentID = this.ID;
-                    nodeManager.MarkAsChanged(n);
+                    node.parentID = this.ID;
+                    nodeManager.MarkAsChanged(node);
 
                     childrenIDs.Insert(0, leftSibling.childrenIDs[leftSibling.entries.Count - 1]);
                     leftSibling.childrenIDs.RemoveAt(leftSibling.entries.Count - 1);

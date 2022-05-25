@@ -49,13 +49,13 @@ namespace CustomDatabase.Logic
                 { return null; }
 
                 // Get total record size & allocate memory.
-                var totalRecordSize = block.GetHeader(kRecordLength);
+                long totalRecordSize = block.GetHeader(kRecordLength);
 
                 if (totalRecordSize > MaxRecordSize)
                 { throw new NotSupportedException("Unexpected record length: " + totalRecordSize); }
 
-                var data = new byte[totalRecordSize];
-                var bytesRead = 0;
+                byte[] data = new byte[totalRecordSize];
+                int bytesRead = 0;
 
                 // Filling the data block.
                 IBlock currentBlock = block;
@@ -97,11 +97,11 @@ namespace CustomDatabase.Logic
 
             using (var firstBlock = AllocateBlock())
             {
-                var returnID = firstBlock.ID;
+                uint returnID = firstBlock.ID;
 
-                var data = dataGenerator(returnID);
-                var dataWritten = 0;
-                var dataToWrite = data.Length;
+                byte[] data = dataGenerator(returnID);
+                int dataWritten = 0;
+                int dataToWrite = data.Length;
 
                 firstBlock.SetHeader(kRecordLength, dataToWrite);
 
@@ -116,7 +116,7 @@ namespace CustomDatabase.Logic
 
                     using (currentBlock)
                     {
-                        var thisWrite = (int)Math.Min(storage.BlockContentSize, dataToWrite - dataWritten);
+                        int thisWrite = Math.Min(storage.BlockContentSize, dataToWrite - dataWritten);
 
                         currentBlock.Write(data, dataWritten, 0, thisWrite);
                         currentBlock.SetHeader(kBlockContentLength, (long)thisWrite);
@@ -125,17 +125,17 @@ namespace CustomDatabase.Logic
                         if (dataWritten < dataToWrite)
                         {
                             nextBlock = AllocateBlock();
-                            var success = false;
+                            bool isSuccess = false;
 
                             try
                             {
                                 nextBlock.SetHeader(kPreviousBlockID, currentBlock.ID);
                                 currentBlock.SetHeader(kNextBlockID, nextBlock.ID);
-                                success = true;
+                                isSuccess = true;
                             }
                             finally
                             {
-                                if (!success && nextBlock != null)
+                                if (!isSuccess && nextBlock != null)
                                 {
                                     nextBlock.Dispose();
                                     nextBlock = null;
@@ -183,7 +183,7 @@ namespace CustomDatabase.Logic
                         MarkAsFree(currentBlock.ID);
                         currentBlock.SetHeader(kIsDeleted, 1L);
 
-                        var nextBlockID = (uint)currentBlock.GetHeader(kNextBlockID);
+                        uint nextBlockID = (uint)currentBlock.GetHeader(kNextBlockID);
 
                         if (nextBlockID == 0)
                         { break; }
@@ -204,18 +204,18 @@ namespace CustomDatabase.Logic
 
         public virtual void Update(uint recordID, byte[] data)
         {
-            var written = 0;
-            var total = data.Length;
+            int written = 0;
+            int total = data.Length;
             var blocks = FindBlocks(recordID);
-            var blocksUsed = 0;
+            int blocksUsed = 0;
             var previousBlock = (IBlock)null;
 
             try
             {
                 while (written < total)
                 {
-                    var bytesToWrite = Math.Min(total - written, storage.BlockContentSize);
-                    var blockIndex = (int)Math.Floor((double)written/(double)storage.BlockContentSize);
+                    int bytesToWrite = Math.Min(total - written, storage.BlockContentSize);
+                    int blockIndex = (int)Math.Floor((double)written/(double)storage.BlockContentSize);
 
                     // If blockIndex exists within blocks, write into it
                     // If not, allocate new one for writing
@@ -274,11 +274,11 @@ namespace CustomDatabase.Logic
         List<IBlock> FindBlocks(uint recordID)
         {
             var blocks = new List<IBlock>();
-            var success = false;
+            bool isSuccess = false;
 
             try
             {
-                var currentBlockID = recordID;
+                uint currentBlockID = recordID;
 
                 do
                 {
@@ -302,12 +302,12 @@ namespace CustomDatabase.Logic
                     currentBlockID = (uint)block.GetHeader(kNextBlockID);
                 } while (currentBlockID != 0);
 
-                success = true;
+                isSuccess = true;
                 return blocks;
             }
             finally
             {
-                if (!success)
+                if (!isSuccess)
                 { 
                     // Emergency cleanup if something goes funky
                     foreach (var block in blocks)
@@ -360,7 +360,7 @@ namespace CustomDatabase.Logic
             using (secondLastBlock)
             {
                 // Go to previous block if current one is empty
-                var currentBlockContentLength = lastBlock.GetHeader(kBlockContentLength);
+                long currentBlockContentLength = lastBlock.GetHeader(kBlockContentLength);
 
                 if (currentBlockContentLength == 0)
                 {
@@ -394,7 +394,7 @@ namespace CustomDatabase.Logic
 
         void AppendUInt32ToContent(IBlock block, uint value)
         {
-            var contentLength = block.GetHeader(kBlockContentLength);
+            long contentLength = block.GetHeader(kBlockContentLength);
 
             if ((contentLength % 4) != 0)
             { throw new DataMisalignedException("Block content length not %4: " + contentLength); }
@@ -404,8 +404,8 @@ namespace CustomDatabase.Logic
 
         uint ReadUInt32FromTrailingContent(IBlock block)
         {
-            var buffer = new byte[4];
-            var contentLength = block.GetHeader(kBlockContentLength);
+            byte[] buffer = new byte[4];
+            long contentLength = block.GetHeader(kBlockContentLength);
 
             if ((contentLength % 4) != 0)
             { throw new DataMisalignedException("Block content length not %4: " + contentLength); }

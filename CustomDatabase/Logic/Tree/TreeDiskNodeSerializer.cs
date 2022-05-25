@@ -67,13 +67,13 @@ namespace CustomDatabase.Logic.Tree
         #region Methods (private)
         byte[] FixedLengthSerialize(TreeNode<K, V> node)
         {
-            var entrySize = this.keySerializer.Length + this.valueSerializer.Length;
-            var size = 16 + (node.Entries.Length * entrySize) + (node.ChildrenIDs.Length * 4);
+            int entrySize = this.keySerializer.Length + this.valueSerializer.Length;
+            int size = 16 + (node.Entries.Length * entrySize) + (node.ChildrenIDs.Length * 4);
 
             if (size >= (1024 * 64))
             { throw new Exception("Serialized node size is too large: " + size); }
 
-            var buffer = new byte[size];
+            byte[] buffer = new byte[size];
 
             // First 4 bytes of the buffer are parentID of this node.
             BufferHelper.WriteBuffer(node.ParentID, buffer, 0);
@@ -94,7 +94,7 @@ namespace CustomDatabase.Logic.Tree
             }
 
             // Writing children refs
-            var childrenIDs = node.ChildrenIDs;
+            uint[] childrenIDs = node.ChildrenIDs;
 
             for (int i = 0; i < node.ChildrenNodeCount; i++)
             { 
@@ -106,16 +106,16 @@ namespace CustomDatabase.Logic.Tree
 
         TreeNode<K, V> FixedLengthDeserialize(uint assignID, byte[] buffer)
         {
-            var entrySize = this.keySerializer.Length + this.valueSerializer.Length;
+            int entrySize = this.keySerializer.Length + this.valueSerializer.Length;
 
             // First 4 bytes of uint32 are parentID of this node.
-            var parentID = BufferHelper.ReadBufferUInt32(buffer, 0);
+            uint parentID = BufferHelper.ReadBufferUInt32(buffer, 0);
 
             // Next 4 are number of entries.
-            var entriesCount = BufferHelper.ReadBufferUInt32(buffer, 4);
+            uint entriesCount = BufferHelper.ReadBufferUInt32(buffer, 4);
 
             // Next 4 are number of children references.
-            var childrenCount = BufferHelper.ReadBufferUInt32(buffer, 8);
+            uint childrenCount = BufferHelper.ReadBufferUInt32(buffer, 8);
 
             // Deserializing entries
             var entries = new Tuple<K, V>[entriesCount];
@@ -129,7 +129,7 @@ namespace CustomDatabase.Logic.Tree
             }
 
             // Reading child refs
-            var children = new uint[childrenCount];
+            uint[] children = new uint[childrenCount];
 
             for (int i = 0; i < childrenCount; i++)
             {
@@ -166,11 +166,11 @@ namespace CustomDatabase.Logic.Tree
                 }
 
                 // Write children refs
-                var childrenIDs = node.ChildrenIDs;
+                uint[] childrenIDs = node.ChildrenIDs;
 
                 for (int i = 0; i < node.ChildrenNodeCount; i++)
                 {
-                    ms.Write(LittleEndianByteOrder.GetBytes((uint)childrenIDs[i]), 0, 4);
+                    ms.Write(LittleEndianByteOrder.GetBytes(childrenIDs[i]), 0, 4);
                 }
 
                 return ms.ToArray();
@@ -180,17 +180,17 @@ namespace CustomDatabase.Logic.Tree
         TreeNode<K, V> VariableLengthDeserialize(uint assignID, byte[] buffer)
         {
             // First 4 bytes of the buffer are parentID of this node.
-            var parentID = BufferHelper.ReadBufferUInt32(buffer, 0);
+            uint parentID = BufferHelper.ReadBufferUInt32(buffer, 0);
 
             // Next 4 are number of entries.
-            var entriesCount = BufferHelper.ReadBufferUInt32(buffer, 4);
+            uint entriesCount = BufferHelper.ReadBufferUInt32(buffer, 4);
 
             // Next 4 are number of children references.
-            var childrenCount = BufferHelper.ReadBufferUInt32(buffer, 8);
+            uint childrenCount = BufferHelper.ReadBufferUInt32(buffer, 8);
 
             // Deserializing entries
             var entries = new Tuple<K, V>[entriesCount];
-            var offset = 12;
+            int offset = 12;
 
             for (int i = 0; i < entriesCount; i++)
             {
@@ -203,7 +203,7 @@ namespace CustomDatabase.Logic.Tree
             }
 
             // Reading children refs
-            var children = new uint[childrenCount];
+            uint[] children = new uint[childrenCount];
 
             for (int i = 0; i < childrenCount; i++)
             {

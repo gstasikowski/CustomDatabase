@@ -85,12 +85,12 @@ namespace CustomDatabase.Logic
             { return blocks[blockID]; }
 
             // Move to the initialized block or return NULL if it doesn't exist
-            var blockPosition = blockID * blockSize;
+            long blockPosition = blockID * blockSize;
             if ((blockPosition + blockSize) > stream.Length)
             { return null; }
 
             // Read the first 4KB of the block to construct a block from it
-            var firstSector = new byte[DiskSectorSize];
+            byte[] firstSector = new byte[DiskSectorSize];
             stream.Position = blockID * blockSize;
             stream.Read(firstSector, 0, DiskSectorSize);
 

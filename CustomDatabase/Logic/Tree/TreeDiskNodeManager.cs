@@ -2,7 +2,6 @@
 using CustomDatabase.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace CustomDatabase.Logic.Tree
 {
@@ -123,7 +122,7 @@ namespace CustomDatabase.Logic.Tree
             }
 
             // If node note in memory, get it.
-            var data = recordStorage.Find(ID);
+            byte[] data = recordStorage.Find(ID);
 
             if (data == null)
             { return null; }

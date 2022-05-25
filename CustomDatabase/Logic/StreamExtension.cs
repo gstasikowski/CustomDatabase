@@ -29,8 +29,8 @@ namespace CustomDatabase.Logic
         /// </summary>
         public static int Read(this Stream src, byte[] buffer)
         {
-            var filled = 0;
-            var lastRead = 0;
+            int filled = 0;
+            int lastRead = 0;
 
             while (filled < buffer.Length)
             {
@@ -49,8 +49,8 @@ namespace CustomDatabase.Logic
         /// </summary>
         public static async Task<int> ReadAsync(this Stream src, byte[] buffer)
         {
-            var filled = 0;
-            var lastRead = 0;
+            int filled = 0;
+            int lastRead = 0;
 
             while (filled < buffer.Length)
             {
@@ -79,8 +79,8 @@ namespace CustomDatabase.Logic
 
             while (totalRead < maxLength)
             {
-                var bytesToRead = (int)Math.Min(maxLength - totalRead, buffer.Length);
-                var thisRead = src.Read(buffer, 0, bytesToRead);
+                int bytesToRead = (int)Math.Min(maxLength - totalRead, buffer.Length);
+                int thisRead = src.Read(buffer, 0, bytesToRead);
 
                 if (thisRead == 0)
                 { throw new EndOfStreamException(); }
@@ -110,8 +110,8 @@ namespace CustomDatabase.Logic
 
             while (totalRead < maxLength)
             {
-                var bytesToRead = (int)Math.Min(maxLength - totalRead, buffer.Length);
-                var thisRead = await src.ReadAsync(buffer, 0, bytesToRead);
+                int bytesToRead = (int)Math.Min(maxLength - totalRead, buffer.Length);
+                int thisRead = await src.ReadAsync(buffer, 0, bytesToRead);
 
                 if (thisRead == 0)
                 { throw new EndOfStreamException(); }

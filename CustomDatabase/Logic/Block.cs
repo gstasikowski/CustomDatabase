@@ -78,7 +78,7 @@ namespace CustomDatabase.Logic
             { cachedHeaderValue[field] = value; }
 
             // Write to cache buffer
-            BufferHelper.WriteBuffer((long)value, firstSector, field * 8);
+            BufferHelper.WriteBuffer(value, firstSector, field * 8);
             isFirstSectorDirty = true;
         }
 
@@ -96,12 +96,12 @@ namespace CustomDatabase.Logic
 
             // If part of the remaining data belongs to the firstSector buffer
             // start by copying from firstSector
-            var dataCopied = 0;
-            var copyFromFirstSector = (storage.BlockHeaderSize + srcOffset) < storage.DiskSectorSize;
+            int dataCopied = 0;
+            bool copyFromFirstSector = (storage.BlockHeaderSize + srcOffset) < storage.DiskSectorSize;
 
             if (copyFromFirstSector)
             {
-                var toCopy = Math.Min(storage.DiskSectorSize - storage.BlockHeaderSize - srcOffset, count);
+                int toCopy = Math.Min(storage.DiskSectorSize - storage.BlockHeaderSize - srcOffset, count);
 
                 Buffer.BlockCopy(src: firstSector,
                     srcOffset: storage.BlockHeaderSize + srcOffset,
@@ -124,8 +124,8 @@ namespace CustomDatabase.Logic
             // Start copying until all done
             while (dataCopied < count)
             {
-                var bytesToRead = Math.Min(storage.DiskSectorSize, count - dataCopied);
-                var thisRead = stream.Read(dst, dstOffset + dataCopied, bytesToRead);
+                int bytesToRead = Math.Min(storage.DiskSectorSize, count - dataCopied);
+                int thisRead = stream.Read(dst, dstOffset + dataCopied, bytesToRead);
 
                 if (thisRead == 0)
                 { throw new EndOfStreamException(); }
@@ -149,7 +149,7 @@ namespace CustomDatabase.Logic
             // Write bytes that belong to the firstSector
             if ((storage.BlockHeaderSize + dstOffset) < storage.DiskSectorSize)
             {
-                var thisWrite = Math.Min(count, storage.DiskSectorSize - storage.BlockHeaderSize - dstOffset);
+                int thisWrite = Math.Min(count, storage.DiskSectorSize - storage.BlockHeaderSize - dstOffset);
                 
                 Buffer.BlockCopy(src: src,
                     srcOffset: srcOffset,
@@ -167,7 +167,7 @@ namespace CustomDatabase.Logic
                 this.stream.Position = (ID * storage.BlockSize) + Math.Max(storage.DiskSectorSize, storage.BlockHeaderSize + dstOffset);
 
                 // Exclude bytes already written in firstSector
-                var firstSectorData = storage.DiskSectorSize - (storage.BlockHeaderSize + dstOffset);
+                int firstSectorData = storage.DiskSectorSize - (storage.BlockHeaderSize + dstOffset);
                 
                 if (firstSectorData > 0)
                 {
@@ -177,10 +177,10 @@ namespace CustomDatabase.Logic
                 }
 
                 // Start writing until all done
-                var written = 0;
+                int written = 0;
                 while (written < count)
                 {
-                    int bytesToWrite = (int)Math.Min(4096, count - written);
+                    int bytesToWrite = Math.Min(4096, count - written);
                     this.stream.Write(src, srcOffset + written, bytesToWrite);
                     this.stream.Flush();
                     written += bytesToWrite;

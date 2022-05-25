@@ -35,8 +35,8 @@ namespace CustomDatabase.Logic.Tree
 
             valueComparer = (valueComparer == null) ? Comparer<V>.Default : valueComparer;
 
-            var deleted = false;
-            var shouldContinue = true;
+            bool isDeleted = false;
+            bool shouldContinue = true;
 
             try
             {
@@ -67,7 +67,7 @@ namespace CustomDatabase.Logic.Tree
                             if (valueComparer.Compare(entry.Item2, value) == 0)
                             {
                                 enumerator.CurrentNode.Remove(enumerator.CurrentEntry);
-                                deleted = true;
+                                isDeleted = true;
                                 break;
                             }
                         }
@@ -78,7 +78,7 @@ namespace CustomDatabase.Logic.Tree
             { }
 
             nodeManager.SaveChanges();
-            return deleted;
+            return isDeleted;
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace CustomDatabase.Logic.Tree
         /// </summary>
         public void Insert(K key, V value)
         {
-            var insertionIndex = 0;
+            int insertionIndex = 0;
             var leafNode = FindNodeForInsertion(key, ref insertionIndex);
 
             if (insertionIndex >= 0 && !allowDuplicateKeys)
@@ -132,7 +132,7 @@ namespace CustomDatabase.Logic.Tree
         /// <returns>Node entry or null.</returns>
         public Tuple<K, V> Get(K key)
         {
-            var insertionIndex = 0;
+            int insertionIndex = 0;
             var node = FindNodeForInsertion(key, ref insertionIndex);
 
             if (insertionIndex < 0)
@@ -156,7 +156,7 @@ namespace CustomDatabase.Logic.Tree
         /// <returns></returns>
         public IEnumerable<Tuple<K, V>> LargerThanOrEqualTo(K key)
         {
-            var startIterationIndex = 0;
+            int startIterationIndex = 0;
             var node = FindNodeForIteration(key, this.nodeManager.RootNode, true, ref startIterationIndex);
 
             return new TreeTraverser<K, V>(nodeManager,
@@ -172,7 +172,7 @@ namespace CustomDatabase.Logic.Tree
         /// <returns></returns>
         public IEnumerable<Tuple<K, V>> LargerThan(K key)
         {
-            var startIterationIndex = 0;
+            int startIterationIndex = 0;
             var node = FindNodeForIteration(key, this.nodeManager.RootNode, false, ref startIterationIndex);
 
             return new TreeTraverser<K, V>(nodeManager,
@@ -188,7 +188,7 @@ namespace CustomDatabase.Logic.Tree
         /// <returns></returns>
         public IEnumerable<Tuple<K, V>> LessThanOrEqualTo(K key)
         {
-            var startIterationIndex = 0;
+            int startIterationIndex = 0;
             var node = FindNodeForIteration(key, this.nodeManager.RootNode, false, ref startIterationIndex);
 
             return new TreeTraverser<K, V>(nodeManager,
@@ -204,7 +204,7 @@ namespace CustomDatabase.Logic.Tree
         /// <returns></returns>
         public IEnumerable<Tuple<K, V>> LessThan(K key)
         {
-            var startIterationIndex = 0;
+            int startIterationIndex = 0;
             var node = FindNodeForIteration(key, this.nodeManager.RootNode, true, ref startIterationIndex);
 
             return new TreeTraverser<K, V>(nodeManager,
@@ -234,7 +234,7 @@ namespace CustomDatabase.Logic.Tree
                 return node;
             }
 
-            var binarySearchResult = node.BinarySearchEntriesForKey(key, moveLeft ? true : false);
+            int binarySearchResult = node.BinarySearchEntriesForKey(key, moveLeft ? true : false);
 
             if (binarySearchResult >= 0)
             {
@@ -279,7 +279,7 @@ namespace CustomDatabase.Logic.Tree
                 return node;
             }
 
-            var binarySearchResult = node.BinarySearchEntriesForKey(key);
+            int binarySearchResult = node.BinarySearchEntriesForKey(key);
 
             if (binarySearchResult >= 0)
             {

@@ -74,7 +74,7 @@ namespace TestApp.Logic
             if (disposed)
             { throw new ObjectDisposedException("PeopleDatabase"); }
 
-            var recordID = this.peopleRecords.Create(this.personSerializer.Serialize(person));
+            uint recordID = this.peopleRecords.Create(this.personSerializer.Serialize(person));
 
             this.primaryIndex.Insert(person.ID, recordID);
             this.secondaryIndex.Insert(new Tuple<string, string>(person.FirstName, person.LastName), recordID);

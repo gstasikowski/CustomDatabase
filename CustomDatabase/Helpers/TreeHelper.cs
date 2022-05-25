@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CustomDatabase.Helpers
 {
@@ -18,11 +15,11 @@ namespace CustomDatabase.Helpers
             if (comparer == null)
             { throw new ArgumentNullException("comparer"); }
 
-            var result = array.BinarySearch(value, comparer);
+            int result = array.BinarySearch(value, comparer);
 
             if (result >= 1)
             {
-                var lastIndex = result;
+                int lastIndex = result;
 
                 for (int i = (result - 1); i >= 0; i--)
                 {
@@ -43,11 +40,11 @@ namespace CustomDatabase.Helpers
             if (comparer == null)
             { throw new ArgumentNullException("comparer"); }
 
-            var result = array.BinarySearch(value, comparer);
+            int result = array.BinarySearch(value, comparer);
 
             if (result >= 0 && (result + 1) < array.Count)
             {
-                var lastIndex = result;
+                int lastIndex = result;
 
                 for (int i = result + 1; i < array.Count; i++)
                 {

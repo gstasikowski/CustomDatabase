@@ -62,7 +62,7 @@ namespace CustomDatabase.Logic
             if ((_readLimit - _position) == 0)
             { return 0; }
 
-            var read = _parent.Read(buffer, offset, (int)Math.Min(count, _readLimit - _position));
+            int read = _parent.Read(buffer, offset, (int)Math.Min(count, _readLimit - _position));
 
             _position += read;
 

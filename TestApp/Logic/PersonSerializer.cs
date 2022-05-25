@@ -8,11 +8,11 @@ namespace TestApp.Logic
     {
         public byte[] Serialize(PersonModel person)
         {
-            var firstNameBytes = System.Text.Encoding.UTF8.GetBytes(person.FirstName);
-            var lastNameBytes = System.Text.Encoding.UTF8.GetBytes(person.LastName);
-            var emailBytes = System.Text.Encoding.UTF8.GetBytes(person.Email);
-            var phoneNumberBytes = System.Text.Encoding.UTF8.GetBytes(person.PhoneNumber);
-            var personData = new byte[
+            byte[] firstNameBytes = System.Text.Encoding.UTF8.GetBytes(person.FirstName);
+            byte[] lastNameBytes = System.Text.Encoding.UTF8.GetBytes(person.LastName);
+            byte[] emailBytes = System.Text.Encoding.UTF8.GetBytes(person.Email);
+            byte[] phoneNumberBytes = System.Text.Encoding.UTF8.GetBytes(person.PhoneNumber);
+            byte[] personData = new byte[
                 16 +                    // 16 bytes for Guid ID
                 4 +                     // 4 bytes indicate the length of first name string
                 firstNameBytes.Length + // n bytes for first name string
@@ -132,7 +132,7 @@ namespace TestApp.Logic
             offset = 16;
 
             // First name
-            var firstNameLength = BufferHelper.ReadBufferInt32(data, offset);
+            int firstNameLength = BufferHelper.ReadBufferInt32(data, offset);
             offset += 4;
 
             if (firstNameLength < 0 || firstNameLength > (16 * 1024))
@@ -142,7 +142,7 @@ namespace TestApp.Logic
             offset += firstNameLength;
 
             // Last name
-            var lastNameLength = BufferHelper.ReadBufferInt32(data, offset);
+            int lastNameLength = BufferHelper.ReadBufferInt32(data, offset);
             offset += 4;
 
             if (lastNameLength < 0 || lastNameLength > (16 * 1024))
@@ -152,7 +152,7 @@ namespace TestApp.Logic
             offset += lastNameLength;
 
             // Email
-            var emailLength = BufferHelper.ReadBufferInt32(data, offset);
+            int emailLength = BufferHelper.ReadBufferInt32(data, offset);
             offset += 4;
 
             if (emailLength < 0 || emailLength > (16 * 1024))
@@ -162,7 +162,7 @@ namespace TestApp.Logic
             offset += emailLength;
 
             // Phone number
-            var phoneNumberLength = BufferHelper.ReadBufferInt32(data, offset);
+            int phoneNumberLength = BufferHelper.ReadBufferInt32(data, offset);
             offset += 4;
 
             if (phoneNumberLength < 0 || phoneNumberLength > (16 * 1024))

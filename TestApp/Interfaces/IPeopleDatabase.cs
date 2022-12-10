@@ -1,6 +1,4 @@
-﻿using TestApp.Models;
-using System;
-using System.Collections.Generic;
+using TestApp.Models;
 
 namespace TestApp.Interfaces
 {
@@ -9,7 +7,7 @@ namespace TestApp.Interfaces
         void Insert(PersonModel person);
         void Delete(PersonModel person);
         void Update(PersonModel person);
-        PersonModel Find(Guid ID);
+        PersonModel Find(Guid id);
         IEnumerable<PersonModel> FindBy(string firstName, string lastName);
     }
 }

@@ -1,5 +1,4 @@
-﻿using CustomDatabase.Interfaces;
-using System;
+using CustomDatabase.Interfaces;
 
 namespace CustomDatabase.Logic.Tree
 {

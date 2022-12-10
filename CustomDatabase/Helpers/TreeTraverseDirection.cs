@@ -1,4 +1,4 @@
-﻿namespace CustomDatabase.Helpers
+namespace CustomDatabase.Helpers
 {
     public enum TreeTraverseDirection
     {

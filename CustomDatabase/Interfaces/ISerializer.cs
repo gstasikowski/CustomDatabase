@@ -1,4 +1,4 @@
-﻿namespace CustomDatabase.Interfaces
+namespace CustomDatabase.Interfaces
 {
     public interface ISerializer<K>
     {

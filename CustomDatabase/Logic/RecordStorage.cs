@@ -1,22 +1,19 @@
-﻿using CustomDatabase.Helpers;
+using CustomDatabase.Helpers;
 using CustomDatabase.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace CustomDatabase.Logic
 {
     public class RecordStorage : IRecordStorage
     {
         #region Variables
-        readonly IBlockStorage storage;
+        private readonly IBlockStorage storage;
 
-        const int MaxRecordSize = 4194304; // 4MB
-        const int kNextBlockID = 0;
-        const int kRecordLength = 1;
-        const int kBlockContentLength = 2;
-        const int kPreviousBlockID = 3;
-        const int kIsDeleted = 4;
+        private const int MaxRecordSize = 4194304; // 4MB
+        private const int kNextBlockId = 0;
+        private const int kRecordLength = 1;
+        private const int kBlockContentLength = 2;
+        private const int kPreviousBlockId = 3;
+        private const int kIsDeleted = 4;
         #endregion Variables
 
         #region Constructor
@@ -33,9 +30,9 @@ namespace CustomDatabase.Logic
         #endregion Constructor
 
         #region Methods (public)
-        public virtual byte[] Find(uint recordID)
+        public virtual byte[] Find(uint recordId)
         {
-            using (var block = storage.Find(recordID))
+            using (var block = storage.Find(recordId))
             {
                 if (block == null)
                 { return null; }
@@ -45,7 +42,7 @@ namespace CustomDatabase.Logic
                 { return null; }
 
                 // Ignore if block is a child.
-                if (0L != block.GetHeader(kPreviousBlockID))
+                if (0L != block.GetHeader(kPreviousBlockId))
                 { return null; }
 
                 // Get total record size & allocate memory.
@@ -62,7 +59,7 @@ namespace CustomDatabase.Logic
 
                 while (true)
                 {
-                    uint nextBlockID;
+                    uint nextBlockId;
 
                     using (currentBlock)
                     {
@@ -72,20 +69,20 @@ namespace CustomDatabase.Logic
                         { throw new Exception("Unexpected block content length: " + thisBlockContentLength); }
 
                         // Reading all content from current block
-                        currentBlock.Read(dst: data, dstOffset: bytesRead, srcOffset: 0, count: (int)thisBlockContentLength);
+                        currentBlock.Read(destination: data, destinationOffset: bytesRead, sourceOffset: 0, count: (int)thisBlockContentLength);
 
                         bytesRead += (int)thisBlockContentLength;
 
-                        nextBlockID = (uint)currentBlock.GetHeader(kNextBlockID);
+                        nextBlockId = (uint)currentBlock.GetHeader(kNextBlockId);
 
-                        if (nextBlockID == 0)
+                        if (nextBlockId == 0)
                         { return data; }
                     }
 
-                    currentBlock = this.storage.Find(nextBlockID);
+                    currentBlock = this.storage.Find(nextBlockId);
 
                     if (currentBlock == null)
-                    { throw new Exception("Block not found by ID: " + nextBlockID); }
+                    { throw new Exception("Block not found by ID: " + nextBlockId); }
                 }
             }
         }
@@ -97,16 +94,16 @@ namespace CustomDatabase.Logic
 
             using (var firstBlock = AllocateBlock())
             {
-                uint returnID = firstBlock.ID;
+                uint returnId = firstBlock.Id;
 
-                byte[] data = dataGenerator(returnID);
+                byte[] data = dataGenerator(returnId);
                 int dataWritten = 0;
                 int dataToWrite = data.Length;
 
                 firstBlock.SetHeader(kRecordLength, dataToWrite);
 
                 if (dataToWrite == 0)
-                { return returnID; }
+                { return returnId; }
 
                 IBlock currentBlock = firstBlock;
 
@@ -129,8 +126,8 @@ namespace CustomDatabase.Logic
 
                             try
                             {
-                                nextBlock.SetHeader(kPreviousBlockID, currentBlock.ID);
-                                currentBlock.SetHeader(kNextBlockID, nextBlock.ID);
+                                nextBlock.SetHeader(kPreviousBlockId, currentBlock.Id);
+                                currentBlock.SetHeader(kNextBlockId, nextBlock.Id);
                                 isSuccess = true;
                             }
                             finally
@@ -150,7 +147,7 @@ namespace CustomDatabase.Logic
                     { currentBlock = nextBlock; }
                 }
 
-                return returnID;
+                return returnId;
             }
         }
 
@@ -159,18 +156,18 @@ namespace CustomDatabase.Logic
             if (data == null)
             { throw new ArgumentException(); }
 
-            return Create(recordID => data);
+            return Create(recordId => data);
         }
 
         public virtual uint Create()
         {
             using (var firstBlock = AllocateBlock())
-            { return firstBlock.ID; }
+            { return firstBlock.Id; }
         }
 
-        public virtual void Delete(uint recordID)
+        public virtual void Delete(uint recordId)
         {
-            using (var block = storage.Find(recordID))
+            using (var block = storage.Find(recordId))
             {
                 IBlock currentBlock = block;
 
@@ -180,19 +177,19 @@ namespace CustomDatabase.Logic
 
                     using (currentBlock)
                     {
-                        MarkAsFree(currentBlock.ID);
+                        MarkAsFree(currentBlock.Id);
                         currentBlock.SetHeader(kIsDeleted, 1L);
 
-                        uint nextBlockID = (uint)currentBlock.GetHeader(kNextBlockID);
+                        uint nextBlockId = (uint)currentBlock.GetHeader(kNextBlockId);
 
-                        if (nextBlockID == 0)
+                        if (nextBlockId == 0)
                         { break; }
                         else
                         {
-                            nextBlock = storage.Find(nextBlockID);
+                            nextBlock = storage.Find(nextBlockId);
 
                             if (currentBlock == null)
-                            { throw new Exception("Block not found by ID: " + nextBlockID); }
+                            { throw new Exception("Block not found by ID: " + nextBlockId); }
                         }
                     }
 
@@ -202,11 +199,11 @@ namespace CustomDatabase.Logic
             }
         }
 
-        public virtual void Update(uint recordID, byte[] data)
+        public virtual void Update(uint recordId, byte[] data)
         {
             int written = 0;
             int total = data.Length;
-            var blocks = FindBlocks(recordID);
+            var blocks = FindBlocks(recordId);
             int blocksUsed = 0;
             var previousBlock = (IBlock)null;
 
@@ -235,13 +232,13 @@ namespace CustomDatabase.Logic
 
                     if (previousBlock != null)
                     {
-                        previousBlock.SetHeader(kNextBlockID, target.ID);
-                        target.SetHeader(kPreviousBlockID, previousBlock.ID);
+                        previousBlock.SetHeader(kNextBlockId, target.Id);
+                        target.SetHeader(kPreviousBlockId, previousBlock.Id);
                     }
 
-                    target.Write(src: data, srcOffset: written, dstOffset: 0, count: bytesToWrite);
+                    target.Write(source: data, sourceOffset: written, destinationOffset: 0, count: bytesToWrite);
                     target.SetHeader(kBlockContentLength, bytesToWrite);
-                    target.SetHeader(kNextBlockID, 0);
+                    target.SetHeader(kNextBlockId, 0);
 
                     if (written == 0)
                     { target.SetHeader(kRecordLength, total); }
@@ -255,7 +252,7 @@ namespace CustomDatabase.Logic
                 if (blocksUsed < blocks.Count())
                 {
                     for (int i = blocksUsed; i < blocks.Count(); i++)
-                    { MarkAsFree(blocks[i].ID); }
+                    { MarkAsFree(blocks[i].Id); }
                 }
             }
             finally
@@ -270,37 +267,37 @@ namespace CustomDatabase.Logic
         /// <summary>
         /// Find all blocks of a record and return in order
         /// </summary>
-        /// <param name="recordID">Record identifier.</param>
-        List<IBlock> FindBlocks(uint recordID)
+        /// <param name="recordId">Record identifier.</param>
+        List<IBlock> FindBlocks(uint recordId)
         {
             var blocks = new List<IBlock>();
             bool isSuccess = false;
 
             try
             {
-                uint currentBlockID = recordID;
+                uint currentBlockId = recordId;
 
                 do
                 {
-                    var block = storage.Find(currentBlockID);
+                    var block = storage.Find(currentBlockId);
 
                     if (block == null)
                     {
                         // If block #0 was never created try doing it
-                        if (currentBlockID == 0)
+                        if (currentBlockId == 0)
                         { block = storage.CreateNew(); }
                         else
-                        { throw new Exception("Block not found by ID: " + currentBlockID); }
+                        { throw new Exception("Block not found by ID: " + currentBlockId); }
                     }
 
                     blocks.Add(block);
 
                     // Ignore the block if it's deleted
                     if (1L == block.GetHeader(kIsDeleted))
-                    { throw new Exception("Block not found: " + currentBlockID); }
+                    { throw new Exception("Block not found: " + currentBlockId); }
 
-                    currentBlockID = (uint)block.GetHeader(kNextBlockID);
-                } while (currentBlockID != 0);
+                    currentBlockId = (uint)block.GetHeader(kNextBlockId);
+                } while (currentBlockId != 0);
 
                 isSuccess = true;
                 return blocks;
@@ -322,10 +319,10 @@ namespace CustomDatabase.Logic
         /// <returns>Newely allocated block.</returns>
         IBlock AllocateBlock()
         {
-            uint reusableBlockID;
+            uint reusableBlockId;
             IBlock newBlock;
 
-            if (!TryFindFreeBlock(out reusableBlockID))
+            if (!TryFindFreeBlock(out reusableBlockId))
             {
                 newBlock = storage.CreateNew();
 
@@ -334,14 +331,14 @@ namespace CustomDatabase.Logic
             }
             else
             {
-                newBlock = storage.Find(reusableBlockID);
+                newBlock = storage.Find(reusableBlockId);
 
                 if (newBlock == null)
-                { throw new Exception("Block not found by ID: " + reusableBlockID); }
+                { throw new Exception("Block not found by ID: " + reusableBlockId); }
 
                 newBlock.SetHeader(kBlockContentLength, 0L);
-                newBlock.SetHeader(kNextBlockID, 0L);
-                newBlock.SetHeader(kPreviousBlockID, 0L);
+                newBlock.SetHeader(kNextBlockId, 0L);
+                newBlock.SetHeader(kPreviousBlockId, 0L);
                 newBlock.SetHeader(kRecordLength, 0L);
                 newBlock.SetHeader(kIsDeleted, 0L);
             }
@@ -349,9 +346,9 @@ namespace CustomDatabase.Logic
             return newBlock;
         }
 
-        bool TryFindFreeBlock(out uint blockID)
+        bool TryFindFreeBlock(out uint blockId)
         {
-            blockID = 0;
+            blockId = 0;
             IBlock lastBlock, secondLastBlock;
 
             GetSpaceTrackingBlock(out lastBlock, out secondLastBlock);
@@ -368,23 +365,23 @@ namespace CustomDatabase.Logic
                     { return false; }
 
                     // Dequeue an uint from previous block, then mark current block as free
-                    blockID = ReadUInt32FromTrailingContent(secondLastBlock);
+                    blockId = ReadUInt32FromTrailingContent(secondLastBlock);
 
                     // Back off 4 bytes before calling AppendUInt32ToContent
                     secondLastBlock.SetHeader(kBlockContentLength, secondLastBlock.GetHeader(kBlockContentLength) - 4);
-                    AppendUInt32ToContent(secondLastBlock, lastBlock.ID);
+                    AppendUInt32ToContent(secondLastBlock, lastBlock.Id);
 
                     // Forward 4 bytes, as an uint32 has been written
                     secondLastBlock.SetHeader(kBlockContentLength, secondLastBlock.GetHeader(kBlockContentLength) + 4);
-                    secondLastBlock.SetHeader(kNextBlockID, 0);
-                    lastBlock.SetHeader(kPreviousBlockID, 0);
+                    secondLastBlock.SetHeader(kNextBlockId, 0);
+                    lastBlock.SetHeader(kPreviousBlockId, 0);
 
                     return true;
                 }
                 else
                 {
                     // If this block is not empty then dequeue an UInt32 from it
-                    blockID = ReadUInt32FromTrailingContent(lastBlock);
+                    blockId = ReadUInt32FromTrailingContent(lastBlock);
                     lastBlock.SetHeader(kBlockContentLength, currentBlockContentLength - 4);
 
                     return true;
@@ -399,7 +396,7 @@ namespace CustomDatabase.Logic
             if ((contentLength % 4) != 0)
             { throw new DataMisalignedException("Block content length not %4: " + contentLength); }
 
-            block.Write(src: LittleEndianByteOrder.GetBytes(value), srcOffset: 0, dstOffset: (int)contentLength, count: 4);
+            block.Write(source: LittleEndianByteOrder.GetBytes(value), sourceOffset: 0, destinationOffset: (int)contentLength, count: 4);
         }
 
         uint ReadUInt32FromTrailingContent(IBlock block)
@@ -413,12 +410,12 @@ namespace CustomDatabase.Logic
             if (contentLength == 0)
             { throw new Exception("Trying to dequeue UInt32 from an empty block."); }
 
-            block.Read(dst: buffer, dstOffset: 0, srcOffset: (int)contentLength - 4, count: 4);
+            block.Read(destination: buffer, destinationOffset: 0, sourceOffset: (int)contentLength - 4, count: 4);
 
             return LittleEndianByteOrder.GetUInt32(buffer);
         }
 
-        void MarkAsFree(uint blockID)
+        void MarkAsFree(uint blockId)
         {
             IBlock lastBlock, secondLastBlock, targetBlock = null;
 
@@ -441,13 +438,13 @@ namespace CustomDatabase.Logic
                         // Allocate new FRESH (!) block if not
                         targetBlock = storage.CreateNew();
 
-                        targetBlock.SetHeader(kPreviousBlockID, lastBlock.ID);
-                        lastBlock.SetHeader(kNextBlockID, targetBlock.ID);
+                        targetBlock.SetHeader(kPreviousBlockId, lastBlock.Id);
+                        lastBlock.SetHeader(kNextBlockId, targetBlock.Id);
 
                         contentLength = 0;
                     }
 
-                    AppendUInt32ToContent(targetBlock, blockID);
+                    AppendUInt32ToContent(targetBlock, blockId);
 
                     targetBlock.SetHeader(kBlockContentLength, contentLength + 4);
                 }

@@ -1,4 +1,4 @@
-﻿namespace CustomDatabase.Interfaces
+namespace CustomDatabase.Interfaces
 {
     public interface IBlockStorage
     {
@@ -25,6 +25,6 @@
         // <summary>
         // Find a block by its ID.
         // </summary>
-        IBlock Find(uint blockID);
+        IBlock Find(uint blockId);
     }
 }

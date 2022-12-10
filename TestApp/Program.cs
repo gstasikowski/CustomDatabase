@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using TestApp.Logic;
+﻿using TestApp.Logic;
 using TestApp.Models;
 
 namespace TestApp
@@ -37,7 +35,7 @@ namespace TestApp
 
 				case "4":
 					Console.Write("Input ID to search for: ");
-					FindEntryByID(dbFile, Console.ReadLine());
+					FindEntryById(dbFile, Console.ReadLine());
 					break;
 
 				case "5":
@@ -67,7 +65,7 @@ namespace TestApp
 				// Insert some people into our database..
 				db.Insert(new PersonModel
 				{
-					ID = Guid.Parse("8872d8ba-e470-440d-aa9b-071822e8053f"),
+					Id = Guid.Parse("8872d8ba-e470-440d-aa9b-071822e8053f"),
 					FirstName = "Emilie",
 					LastName = "Dundee",
 					Email = "ed@email.com",
@@ -77,7 +75,7 @@ namespace TestApp
 
 				db.Insert(new PersonModel
 				{
-					ID = Guid.Parse("59ee9033-4ec5-40e0-91a7-6c9ecb6e0465"),
+					Id = Guid.Parse("59ee9033-4ec5-40e0-91a7-6c9ecb6e0465"),
 					FirstName = "Randy",
 					LastName = "Lopez",
 					Email = "big-rand@email.com",
@@ -86,11 +84,11 @@ namespace TestApp
 				Console.WriteLine("Inserted 2 people");
 			}
 
-			FindEntryByID(dbFile, "8872d8ba-e470-440d-aa9b-071822e8053f");
+			FindEntryById(dbFile, "8872d8ba-e470-440d-aa9b-071822e8053f");
 			ShowAllEntries(dbFile);
 		}
 
-		static void FindEntryByID(string dbFile, string id)
+		static void FindEntryById(string dbFile, string id)
 		{
 			// Reconstruct the database, to demonstrate that data is persistent
 			using (var db = new PeopleDatabase(dbFile))
@@ -98,7 +96,7 @@ namespace TestApp
 				// Find a person by ID, 
 				// This uses the primary index so the query is an ad-hoc query.
 				var person = db.Find(Guid.Parse(id));
-				string personInfo = string.Format("\n| ID: {0}\n| Name: {1} {2}\n| Email: {3}\n| Phone number: {4}", person.ID, person.FirstName, person.LastName, person.Email, person.PhoneNumber);
+				string personInfo = string.Format("\n| ID: {0}\n| Name: {1} {2}\n| Email: {3}\n| Phone number: {4}", person.Id, person.FirstName, person.LastName, person.Email, person.PhoneNumber);
 				Console.WriteLine(personInfo);
 			}
 
@@ -115,7 +113,7 @@ namespace TestApp
 				Console.WriteLine("\nPeople found:\n-------------");
 				foreach (var row in db.GetAll())
 				{
-					string personInfo = string.Format("\n| ID: {0}\n| Name: {1} {2}\n| Email: {3}\n| Phone number: {4}", row.ID, row.FirstName, row.LastName, row.Email, row.PhoneNumber);
+					string personInfo = string.Format("\n| ID: {0}\n| Name: {1} {2}\n| Email: {3}\n| Phone number: {4}", row.Id, row.FirstName, row.LastName, row.Email, row.PhoneNumber);
 					Console.WriteLine(personInfo);
 				}
 
@@ -128,7 +126,7 @@ namespace TestApp
 		{
 			var person = new PersonModel();
 
-			person.ID = Guid.NewGuid();
+			person.Id = Guid.NewGuid();
 
 			Console.Write("Enter first name: ");
 			person.FirstName = Console.ReadLine();

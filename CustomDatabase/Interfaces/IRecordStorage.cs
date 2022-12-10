@@ -1,5 +1,3 @@
-﻿using System;
-
 namespace CustomDatabase.Interfaces
 {
     public interface IRecordStorage
@@ -7,12 +5,12 @@ namespace CustomDatabase.Interfaces
         // <summary>
         // Effectively update a record.
         // </summary>
-        void Update(uint recordID, byte[] data);
+        void Update(uint recordId, byte[] data);
 
         // <summary>
         // Get record's data.
         // </summary>
-        byte[] Find(uint recordID);
+        byte[] Find(uint recordId);
 
         // <summary>
         // Create new empty record.
@@ -28,6 +26,6 @@ namespace CustomDatabase.Interfaces
         // <summary>
         // Delete a record by its ID.
         // </summary>
-        void Delete(uint recordID);
+        void Delete(uint recordId);
     }
 }

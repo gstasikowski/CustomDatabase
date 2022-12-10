@@ -1,21 +1,19 @@
-﻿using CustomDatabase.Helpers;
+using CustomDatabase.Helpers;
 using CustomDatabase.Interfaces;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 
 namespace CustomDatabase.Logic.Tree
 {
     public class TreeEnumerator<K, V> : IEnumerator<Tuple<K, V>>
     {
         #region Variables
-        readonly ITreeNodeManager<K, V> nodeManager;
-        readonly TreeTraverseDirection direction;
+        private readonly ITreeNodeManager<K, V> nodeManager;
+        private readonly TreeTraverseDirection direction;
 
-        bool doneIterating = false;
-        int currentEntry = 0;
-        TreeNode<K, V> currentNode;
-        Tuple<K, V> current;
+        private bool isDoneIterating = false;
+        private int currentEntry = 0;
+        private TreeNode<K, V> currentNode;
+        private Tuple<K, V> current;
         #endregion Variables
 
         #region Properties
@@ -56,7 +54,7 @@ namespace CustomDatabase.Logic.Tree
         #region Methods (public)
         public bool MoveNext()
         {
-            if (doneIterating)
+            if (isDoneIterating)
             { return false; }
 
             switch (this.direction)
@@ -89,10 +87,10 @@ namespace CustomDatabase.Logic.Tree
                         current = currentNode.GetEntry(currentEntry);
                         return true;
                     }
-                    else if (currentNode.ParentID != 0)
+                    else if (currentNode.ParentId != 0)
                     {
                         currentEntry = currentNode.IndexInParent();
-                        currentNode = nodeManager.Find(currentNode.ParentID);
+                        currentNode = nodeManager.Find(currentNode.ParentId);
 
                         if (currentEntry < 0 || currentNode == null)
                         { throw new Exception("Something gone wrong with BTree."); }
@@ -100,7 +98,7 @@ namespace CustomDatabase.Logic.Tree
                     else
                     {
                         current = null;
-                        doneIterating = true;
+                        isDoneIterating = true;
                         return false;
                     }
                 }
@@ -139,10 +137,10 @@ namespace CustomDatabase.Logic.Tree
                         current = currentNode.GetEntry(currentEntry);
                         return true;
                     }
-                    else if (currentNode.ParentID != 0)
+                    else if (currentNode.ParentId != 0)
                     {
                         currentEntry = currentNode.IndexInParent() - 1;
-                        currentNode = nodeManager.Find(currentNode.ParentID);
+                        currentNode = nodeManager.Find(currentNode.ParentId);
 
                         if (currentNode == null)
                         { throw new Exception("Something gone wrong with BTree."); }
@@ -150,7 +148,7 @@ namespace CustomDatabase.Logic.Tree
                     else
                     {
                         current = null;
-                        doneIterating = true;
+                        isDoneIterating = true;
                         return false;
                     }
                 }

@@ -1,6 +1,3 @@
-﻿using System;
-using System.IO;
-
 namespace CustomDatabase.Logic
 {
     /// <summary>
@@ -10,9 +7,9 @@ namespace CustomDatabase.Logic
     public class StreamReadWrapper : Stream
     {
         #region Variables
-        readonly Stream _parent;
-        long _readLimit;
-        long _position = 0;
+        private readonly Stream _parent;
+        private long _readLimit;
+        private long _position = 0;
         #endregion Variables
 
         #region Properties

@@ -1,7 +1,4 @@
-﻿using CustomDatabase.Helpers;
-using System;
-using System.IO;
-using System.Threading.Tasks;
+using CustomDatabase.Helpers;
 
 namespace CustomDatabase.Logic
 {
@@ -47,14 +44,14 @@ namespace CustomDatabase.Logic
         /// <summary>
         /// Read until given buffer is filled or end of the stream is reached (async).
         /// </summary>
-        public static async Task<int> ReadAsync(this Stream src, byte[] buffer)
+        public static async Task<int> ReadAsync(this Stream source, byte[] buffer)
         {
             int filled = 0;
             int lastRead = 0;
 
             while (filled < buffer.Length)
             {
-                lastRead = await src.ReadAsync(buffer, filled, buffer.Length - filled);
+                lastRead = await source.ReadAsync(buffer, filled, buffer.Length - filled);
                 filled += lastRead;
 
                 if (lastRead == 0)
@@ -68,8 +65,8 @@ namespace CustomDatabase.Logic
         /// Similar to Stream.CopyTo but with option to inject a delegate
         /// to receive feedback (for loading bars etc).
         /// </summary>
-        public static void CopyTo(this Stream src,
-            Stream dest,
+        public static void CopyTo(this Stream source,
+            Stream destination,
             int bufferSize = 4096,
             Func<long, bool> feedback = null,
             long maxLength = 0)
@@ -80,15 +77,15 @@ namespace CustomDatabase.Logic
             while (totalRead < maxLength)
             {
                 int bytesToRead = (int)Math.Min(maxLength - totalRead, buffer.Length);
-                int thisRead = src.Read(buffer, 0, bytesToRead);
+                int thisRead = source.Read(buffer, 0, bytesToRead);
 
                 if (thisRead == 0)
                 { throw new EndOfStreamException(); }
 
                 totalRead += thisRead;
 
-                dest.Write(buffer, 0, thisRead);
-                dest.Flush();
+                destination.Write(buffer, 0, thisRead);
+                destination.Flush();
 
                 // Call feedback, if "false" then stop copying
                 if (feedback != null && feedback(totalRead) == false)
@@ -99,8 +96,8 @@ namespace CustomDatabase.Logic
         /// <summary>
         /// Ditto but async.
         /// </summary>
-        public static async Task CopyToAsync(this Stream src,
-            Stream dest,
+        public static async Task CopyToAsync(this Stream source,
+            Stream destination,
             int bufferSize = 4096,
             Func<long, bool> feedback = null,
             long maxLength = 0)
@@ -111,15 +108,15 @@ namespace CustomDatabase.Logic
             while (totalRead < maxLength)
             {
                 int bytesToRead = (int)Math.Min(maxLength - totalRead, buffer.Length);
-                int thisRead = await src.ReadAsync(buffer, 0, bytesToRead);
+                int thisRead = await source.ReadAsync(buffer, 0, bytesToRead);
 
                 if (thisRead == 0)
                 { throw new EndOfStreamException(); }
 
                 totalRead += thisRead;
 
-                dest.Write(buffer, 0, thisRead);
-                dest.Flush();
+                destination.Write(buffer, 0, thisRead);
+                destination.Flush();
 
                 // Call feedback, if "false" then stop copying
                 if (feedback != null && feedback(totalRead) == false)

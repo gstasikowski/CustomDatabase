@@ -1,19 +1,17 @@
-﻿using CustomDatabase.Interfaces;
-using System;
-using System.Collections.Generic;
+using CustomDatabase.Interfaces;
 
 namespace CustomDatabase.Logic.Tree
 {
     public class TreeMemoryNodeManager<K, V> : ITreeNodeManager<K, V>
     {
         #region Variables
-        readonly Dictionary<uint, TreeNode<K, V>> nodes = new Dictionary<uint, TreeNode<K, V>>();
-        readonly ushort minEntriesCountPerNode;
-        readonly IComparer<K> keyComparer;
-        readonly IComparer<Tuple<K, V>> entryComparer;
+        private readonly Dictionary<uint, TreeNode<K, V>> nodes = new Dictionary<uint, TreeNode<K, V>>();
+        private readonly ushort minEntriesCountPerNode;
+        private readonly IComparer<K> keyComparer;
+        private readonly IComparer<Tuple<K, V>> entryComparer;
 
-        int idCounter = 1;
-        TreeNode<K, V> rootNode;
+        private int idCounter = 1;
+        private TreeNode<K, V> rootNode;
         #endregion Variables
 
         #region Properties
@@ -53,26 +51,26 @@ namespace CustomDatabase.Logic.Tree
         #endregion Constructor
 
         #region Methods (public)
-        public TreeNode<K, V> Create(IEnumerable<Tuple<K, V>> entries, IEnumerable<uint> childrenIDs)
+        public TreeNode<K, V> Create(IEnumerable<Tuple<K, V>> entries, IEnumerable<uint> childrenIds)
         {
-            var newNode = new TreeNode<K, V>(this, (uint)(this.idCounter++), 0, entries, childrenIDs);
+            var newNode = new TreeNode<K, V>(this, (uint)(this.idCounter++), 0, entries, childrenIds);
 
-            nodes[newNode.ID] = newNode;
+            nodes[newNode.Id] = newNode;
 
             return newNode;
         }
 
-        public TreeNode<K, V> Find(uint ID)
+        public TreeNode<K, V> Find(uint id)
         {
-            if (!nodes.ContainsKey(ID))
-            { throw new ArgumentException("Node not found by ID: " + ID); }
+            if (!nodes.ContainsKey(id))
+            { throw new ArgumentException("Node not found by ID: " + id); }
 
-            return nodes[ID];
+            return nodes[id];
         }
 
-        public TreeNode<K, V> CreateNewRoot(K key, V value, uint leftNodeID, uint rightNodeID)
+        public TreeNode<K, V> CreateNewRoot(K key, V value, uint leftNodeId, uint rightNodeId)
         {
-            var newNode = Create(new Tuple<K, V>[] { new Tuple<K, V>(key, value) }, new uint[] { leftNodeID, rightNodeID });
+            var newNode = Create(new Tuple<K, V>[] { new Tuple<K, V>(key, value) }, new uint[] { leftNodeId, rightNodeId });
 
             this.rootNode = newNode;
 
@@ -84,8 +82,8 @@ namespace CustomDatabase.Logic.Tree
             if (target == rootNode)
             { rootNode = null; }
 
-            if (nodes.ContainsKey(target.ID))
-            { nodes.Remove(target.ID); }
+            if (nodes.ContainsKey(target.Id))
+            { nodes.Remove(target.Id); }
         }
 
         public void MakeRoot(TreeNode<K, V> target)

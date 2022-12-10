@@ -1,8 +1,5 @@
-﻿using CustomDatabase.Logic;
+using CustomDatabase.Logic;
 using CustomDatabase.Logic.Tree;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using TestApp.Models;
 
 namespace TestApp.Logic
@@ -10,13 +7,13 @@ namespace TestApp.Logic
     class PeopleDatabase : IDisposable
     {
         #region Variables
-        readonly Stream mainDatabaseFile;
-        readonly Stream primaryIndexFile;
-        readonly Stream secondaryIndexFile;
-        readonly Tree<Guid, uint> primaryIndex;
-        readonly Tree<Tuple<string, string>, uint> secondaryIndex;
-        readonly RecordStorage peopleRecords;
-        readonly PersonSerializer personSerializer = new PersonSerializer();
+        private readonly Stream mainDatabaseFile;
+        private readonly Stream primaryIndexFile;
+        private readonly Stream secondaryIndexFile;
+        private readonly Tree<Guid, uint> primaryIndex;
+        private readonly Tree<Tuple<string, string>, uint> secondaryIndex;
+        private readonly RecordStorage peopleRecords;
+        private readonly PersonSerializer personSerializer = new PersonSerializer();
         #endregion Variables
 
         #region Constructor
@@ -74,21 +71,21 @@ namespace TestApp.Logic
             if (disposed)
             { throw new ObjectDisposedException("PeopleDatabase"); }
 
-            uint recordID = this.peopleRecords.Create(this.personSerializer.Serialize(person));
+            uint recordId = this.peopleRecords.Create(this.personSerializer.Serialize(person));
 
-            this.primaryIndex.Insert(person.ID, recordID);
-            this.secondaryIndex.Insert(new Tuple<string, string>(person.FirstName, person.LastName), recordID);
+            this.primaryIndex.Insert(person.Id, recordId);
+            this.secondaryIndex.Insert(new Tuple<string, string>(person.FirstName, person.LastName), recordId);
         }
 
         /// <summary>
         /// Find an entry by ID.
         /// </summary>
-        public PersonModel Find(Guid ID)
+        public PersonModel Find(Guid id)
         {
             if (disposed)
             { throw new ObjectDisposedException("PeopleDatabase"); }
 
-            var entry = this.primaryIndex.Get(ID);
+            var entry = this.primaryIndex.Get(id);
 
             if (entry == null)
             { return null; }

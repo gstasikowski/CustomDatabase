@@ -1,74 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4E726DB0-3758-4DE1-9065-9340EBD50F94}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>CustomDatabase</RootNamespace>
-    <AssemblyName>CustomDatabase</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <Compile Include="Exceptions\EndEnumeratingException.cs" />
-    <Compile Include="Exceptions\TreeKeyExistsException.cs" />
-    <Compile Include="Exceptions\TreeNodeSerializationException.cs" />
-    <Compile Include="Helpers\LittleEndianByteOrder.cs" />
-    <Compile Include="Helpers\TreeHelper.cs" />
-    <Compile Include="Helpers\TreeTraverseDirection.cs" />
-    <Compile Include="Interfaces\IBlock.cs" />
-    <Compile Include="Interfaces\IBlockStorage.cs" />
-    <Compile Include="Interfaces\IIndex.cs" />
-    <Compile Include="Interfaces\IRecordStorage.cs" />
-    <Compile Include="Interfaces\ISerializer.cs" />
-    <Compile Include="Interfaces\ITreeNodeManager.cs" />
-    <Compile Include="Logic\Block.cs" />
-    <Compile Include="Logic\BlockStorage.cs" />
-    <Compile Include="Helpers\BufferHelper.cs" />
-    <Compile Include="Logic\RecordStorage.cs" />
-    <Compile Include="Logic\StreamExtension.cs" />
-    <Compile Include="Logic\StreamReadWrapper.cs" />
-    <Compile Include="Logic\Tree\Tree.cs" />
-    <Compile Include="Logic\Tree\TreeDiskNodeManager.cs" />
-    <Compile Include="Logic\Tree\TreeEnumerator.cs" />
-    <Compile Include="Logic\Tree\TreeIntSerializer.cs" />
-    <Compile Include="Logic\Tree\TreeLongSerializer.cs" />
-    <Compile Include="Logic\Tree\TreeMemoryNodeManager.cs" />
-    <Compile Include="Logic\Tree\TreeNode.cs" />
-    <Compile Include="Logic\Tree\TreeDiskNodeSerializer.cs" />
-    <Compile Include="Logic\Tree\TreeStringSerializer.cs" />
-    <Compile Include="Logic\Tree\TreeTraverser.cs" />
-    <Compile Include="Logic\Tree\TreeUIntSerializer.cs" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
 </Project>

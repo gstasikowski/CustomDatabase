@@ -1,6 +1,4 @@
-﻿using CustomDatabase.Logic.Tree;
-using System;
-using System.Collections.Generic;
+using CustomDatabase.Logic.Tree;
 
 namespace CustomDatabase.Interfaces
 {
@@ -37,20 +35,20 @@ namespace CustomDatabase.Interfaces
         /// and keeps references to given children nodes.
         /// </summary>
         /// <param name="entries">Entries</param>
-        /// <param name="childrenIDs">Children identifiers.</param>
-        TreeNode<K, V> Create(IEnumerable<Tuple<K, V>> entries, IEnumerable<uint> childrenIDs);
+        /// <param name="childrenIds">Children identifiers.</param>
+        TreeNode<K, V> Create(IEnumerable<Tuple<K, V>> entries, IEnumerable<uint> childrenIds);
 
         /// <summary>
         /// Find a node by its ID.
         /// </summary>
-        TreeNode<K, V> Find(uint ID);
+        TreeNode<K, V> Find(uint id);
 
         /// <summary>
         /// Called by the tree to split current root node to a new one.
         /// </summary>
-        /// <param name="leftNodeID">Left node identifier.</param>
-        /// <param name="rightNodeID">Right node identifier.</param>
-        TreeNode<K, V> CreateNewRoot(K key, V value, uint leftNodeID, uint rightNodeID);
+        /// <param name="leftNodeId">Left node identifier.</param>
+        /// <param name="rightNodeId">Right node identifier.</param>
+        TreeNode<K, V> CreateNewRoot(K key, V value, uint leftNodeId, uint rightNodeId);
 
         /// <summary>
         /// Make given node into root.
@@ -73,4 +71,4 @@ namespace CustomDatabase.Interfaces
         /// </summary>
         void SaveChanges();
     }
-}
+}   

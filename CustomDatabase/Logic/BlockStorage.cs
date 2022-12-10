@@ -1,19 +1,16 @@
-﻿using CustomDatabase.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.IO;
+using CustomDatabase.Interfaces;
 
 namespace CustomDatabase.Logic
 {
     public class BlockStorage : IBlockStorage
     {
         #region Variables
-        readonly Stream stream;
-        readonly int blockContentSize;
-        readonly int blockHeaderSize;
-        readonly int blockSize;
-        readonly int unitOfWork;
-        readonly Dictionary<uint, Block> blocks = new Dictionary<uint, Block>();
+        private readonly Stream stream;
+        private readonly int blockContentSize;
+        private readonly int blockHeaderSize;
+        private readonly int blockSize;
+        private readonly int unitOfWork;
+        private readonly Dictionary<uint, Block> blocks = new Dictionary<uint, Block>();
         #endregion Variables
 
         #region Properties
@@ -65,36 +62,36 @@ namespace CustomDatabase.Logic
             { throw new DataMisalignedException("Unexpected length of the stream: " + stream.Length); }
 
             // Calculate new block ID
-            uint blockID = (uint)Math.Ceiling((double)stream.Length / (double)blockSize);
+            uint blockId = (uint)Math.Ceiling((double)stream.Length / (double)blockSize);
 
             // Extend length of underlying stream
-            stream.SetLength((long)((blockID * blockSize) + blockSize));
+            stream.SetLength((long)((blockId * blockSize) + blockSize));
             stream.Flush();
 
             // Return new block
-            Block newBlock = new Block(this, blockID, new byte[DiskSectorSize], stream);
+            Block newBlock = new Block(this, blockId, new byte[DiskSectorSize], stream);
             OnBlockInitialized(newBlock);
             
             return newBlock;
         }
 
-        public IBlock Find(uint blockID)
+        public IBlock Find(uint blockId)
         {
             // Search from initialized block
-            if (blocks.ContainsKey(blockID))
-            { return blocks[blockID]; }
+            if (blocks.ContainsKey(blockId))
+            { return blocks[blockId]; }
 
             // Move to the initialized block or return NULL if it doesn't exist
-            long blockPosition = blockID * blockSize;
+            long blockPosition = blockId * blockSize;
             if ((blockPosition + blockSize) > stream.Length)
             { return null; }
 
             // Read the first 4KB of the block to construct a block from it
             byte[] firstSector = new byte[DiskSectorSize];
-            stream.Position = blockID * blockSize;
+            stream.Position = blockId * blockSize;
             stream.Read(firstSector, 0, DiskSectorSize);
 
-            var newBlock = new Block(this, blockID, firstSector, stream);
+            var newBlock = new Block(this, blockId, firstSector, stream);
             OnBlockInitialized(newBlock);
 
             return newBlock;
@@ -105,7 +102,7 @@ namespace CustomDatabase.Logic
         protected virtual void OnBlockInitialized(Block block)
         {
             // Keep reference to initialized block
-            blocks[block.ID] = block;
+            blocks[block.Id] = block;
 
             // Remove from memory when block is disposed
             block.Disposed += HandleBlockDisposed;
@@ -118,7 +115,7 @@ namespace CustomDatabase.Logic
             block.Disposed -= HandleBlockDisposed;
 
             // Remove block from memory
-            blocks.Remove(block.ID);
+            blocks.Remove(block.Id);
         }
         #endregion Methods (protected)
     }

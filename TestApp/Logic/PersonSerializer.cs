@@ -1,5 +1,4 @@
-﻿using CustomDatabase.Helpers;
-using System;
+using CustomDatabase.Helpers;
 using TestApp.Models;
 
 namespace TestApp.Logic
@@ -28,7 +27,7 @@ namespace TestApp.Logic
 
             // ID
             Buffer.BlockCopy(
-                src: person.ID.ToByteArray(),
+                src: person.Id.ToByteArray(),
                 srcOffset: 0,
                 dst: personData,
                 dstOffset: offset,
@@ -128,7 +127,7 @@ namespace TestApp.Logic
             int offset = 0;
 
             // ID
-            personModel.ID = BufferHelper.ReadBufferGuid(data, offset);
+            personModel.Id = BufferHelper.ReadBufferGuid(data, offset);
             offset = 16;
 
             // First name

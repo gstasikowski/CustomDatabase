@@ -1,16 +1,14 @@
-﻿using CustomDatabase.Exceptions;
+using CustomDatabase.Exceptions;
 using CustomDatabase.Helpers;
 using CustomDatabase.Interfaces;
-using System;
-using System.Collections.Generic;
 
 namespace CustomDatabase.Logic.Tree
 {
     public class Tree<K, V> : IIndex<K, V>
     {
         #region Variables
-        readonly ITreeNodeManager<K, V> nodeManager;
-        readonly bool allowDuplicateKeys;
+        private readonly ITreeNodeManager<K, V> nodeManager;
+        private readonly bool allowDuplicateKeys;
         #endregion Variables
 
         #region Constructor

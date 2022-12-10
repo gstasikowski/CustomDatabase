@@ -1,8 +1,5 @@
-﻿using CustomDatabase.Helpers;
+using CustomDatabase.Helpers;
 using CustomDatabase.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace CustomDatabase.Logic.Tree
 {
@@ -10,9 +7,9 @@ namespace CustomDatabase.Logic.Tree
     {
         #region Variables
         protected uint id = 0;
-        protected uint parentID;
+        protected uint parentId;
         protected readonly ITreeNodeManager<K, V> nodeManager;
-        protected readonly List<uint> childrenIDs;
+        protected readonly List<uint> childrenIds;
         protected readonly List<Tuple<K, V>> entries;
         #endregion Variables
 
@@ -34,7 +31,7 @@ namespace CustomDatabase.Logic.Tree
 
         public bool IsLeaf
         {
-            get { return childrenIDs.Count == 0; }
+            get { return childrenIds.Count == 0; }
         }
 
         public bool IsOverflow
@@ -49,22 +46,22 @@ namespace CustomDatabase.Logic.Tree
 
         public int ChildrenNodeCount
         {
-            get { return childrenIDs.Count; }
+            get { return childrenIds.Count; }
         }
 
-        public uint ParentID
+        public uint ParentId
         {
-            get { return parentID; }
+            get { return parentId; }
             private set 
             {
-                parentID = value;
+                parentId = value;
                 nodeManager.MarkAsChanged(this);
             }
         }
 
-        public uint[] ChildrenIDs
+        public uint[] ChildrenIds
         {
-            get { return childrenIDs.ToArray(); }
+            get { return childrenIds.ToArray(); }
         }
 
         public Tuple<K, V>[] Entries
@@ -76,7 +73,7 @@ namespace CustomDatabase.Logic.Tree
         ///  Id of this node, assigned by node manager.
         ///  Never changed by node itself.
         /// </summary>
-        public uint ID
+        public uint Id
         { get { return id; } }
         #endregion
 
@@ -87,26 +84,26 @@ namespace CustomDatabase.Logic.Tree
         /// <param name="branchingFactor">Branching factor</param>
         /// <param name="nodeManager">Node manager.</param>
         public TreeNode(ITreeNodeManager<K, V> nodeManager, 
-            uint ID, 
-            uint parentID, 
+            uint id, 
+            uint parentId, 
             IEnumerable<Tuple<K, V>> entries = null,
-            IEnumerable<uint> childrenIDs = null)
+            IEnumerable<uint> childrenIds = null)
         {
             if (nodeManager == null)
             { throw new ArgumentNullException(nameof(nodeManager)); }
 
-            this.id = ID;
-            this.parentID = parentID;
+            this.id = id;
+            this.parentId = parentId;
             this.nodeManager = nodeManager;
             this.entries = new List<Tuple<K, V>>(this.nodeManager.MinEntriesPerNode * 2);
-            this.childrenIDs = new List<uint>();
+            this.childrenIds = new List<uint>();
 
             // Loading data
             if (entries != null)
             { this.entries.AddRange(entries); }
 
-            if (childrenIDs != null)
-            { this.childrenIDs.AddRange(childrenIDs); }
+            if (childrenIds != null)
+            { this.childrenIds.AddRange(childrenIds); }
         }
         #endregion Constructor
 
@@ -128,7 +125,7 @@ namespace CustomDatabase.Logic.Tree
                 nodeManager.MarkAsChanged(this);
 
                 // Check for underflow and Rebalance() if needed
-                if ((EntriesCount >= nodeManager.MinEntriesPerNode) || parentID == 0)
+                if ((EntriesCount >= nodeManager.MinEntriesPerNode) || parentId == 0)
                 { return; }
                 else
                 { Rebalance(); }
@@ -136,7 +133,7 @@ namespace CustomDatabase.Logic.Tree
             else
             {
                 // Find largest entry on the left subtree
-                var leftSubTree = nodeManager.Find(this.childrenIDs[removeAt]);
+                var leftSubTree = nodeManager.Find(this.childrenIds[removeAt]);
                 TreeNode<K, V> largestNode;
                 int largestIndex;
 
@@ -156,20 +153,20 @@ namespace CustomDatabase.Logic.Tree
         /// </summary>
         public int IndexInParent()
         {
-            var parent = nodeManager.Find(parentID);
+            var parent = nodeManager.Find(parentId);
 
             if (parent == null)
-            { throw new Exception("IndexInParent failed to find parent node of " + ID); }
+            { throw new Exception("IndexInParent failed to find parent node of " + Id); }
 
-            var childrenIDs = parent.childrenIDs;
+            var childrenIds = parent.childrenIds;
 
-            for (int i = 0; i < childrenIDs.Count; i++)
+            for (int i = 0; i < childrenIds.Count; i++)
             {
-                if (childrenIDs[i] == ID)
+                if (childrenIds[i] == Id)
                 { return i; }
             }
 
-            throw new Exception("Failed to find index of node " + ID + "in its parent.");
+            throw new Exception("Failed to find index of node " + Id + "in its parent.");
         }
 
         /// <summary>
@@ -187,7 +184,7 @@ namespace CustomDatabase.Logic.Tree
             }
             else
             {
-                var rightMostNode = nodeManager.Find(this.childrenIDs[this.childrenIDs.Count - 1]);
+                var rightMostNode = nodeManager.Find(this.childrenIds[this.childrenIds.Count - 1]);
                 rightMostNode.FindLargest(out node, out index);
             }
         }
@@ -206,7 +203,7 @@ namespace CustomDatabase.Logic.Tree
             }
             else
             {
-                var leftMostNode = nodeManager.Find(this.childrenIDs[0]);
+                var leftMostNode = nodeManager.Find(this.childrenIds[0]);
                 leftMostNode.FindSmallest(out node, out index);
             }
         }
@@ -227,8 +224,8 @@ namespace CustomDatabase.Logic.Tree
             entries.Insert(insertPosition, new Tuple<K, V>(key, value));
 
             // Insert and update child references
-            childrenIDs.Insert(insertPosition, leftReference);
-            childrenIDs[insertPosition + 1] = rightReference;
+            childrenIds.Insert(insertPosition, leftReference);
+            childrenIds[insertPosition + 1] = rightReference;
 
             nodeManager.MarkAsChanged(this);
         }
@@ -250,7 +247,7 @@ namespace CustomDatabase.Logic.Tree
             if (!IsLeaf)
             {
                 rightChildren = new uint[halfCount + 1];
-                childrenIDs.CopyTo(halfCount + 1, rightChildren, 0, rightChildren.Length);
+                childrenIds.CopyTo(halfCount + 1, rightChildren, 0, rightChildren.Length);
             }
 
             var newRightNode = nodeManager.Create(rightEntries, rightChildren);
@@ -258,30 +255,30 @@ namespace CustomDatabase.Logic.Tree
             // Update ParentID property for moved children nodes
             if (rightChildren != null)
             {
-                foreach (uint childID in rightChildren)
-                { nodeManager.Find(childID).ParentID = newRightNode.ID; }
+                foreach (uint childId in rightChildren)
+                { nodeManager.Find(childId).ParentId = newRightNode.Id; }
             }
 
             // Remove all values after the halfCount from current node
             entries.RemoveRange(halfCount);
 
             if (!IsLeaf)
-            { childrenIDs.RemoveRange(halfCount + 1); }
+            { childrenIds.RemoveRange(halfCount + 1); }
 
             // Insert middle element to parent node or
             // make it into a new root if there is no parent
-            var parent = (parentID == 0) ? null : nodeManager.Find(parentID);
+            var parent = (parentId == 0) ? null : nodeManager.Find(parentId);
 
             if (parent == null)
             {
                 parent = this.nodeManager.CreateNewRoot(
                     middleEntry.Item1,
                     middleEntry.Item2,
-                    ID,
-                    newRightNode.ID);
+                    Id,
+                    newRightNode.Id);
 
-                this.ParentID = parent.ID;
-                newRightNode.ParentID = parent.ID;
+                this.ParentId = parent.Id;
+                newRightNode.ParentId = parent.Id;
             }
             else
             {
@@ -290,11 +287,11 @@ namespace CustomDatabase.Logic.Tree
                 parent.InsertAsParent(
                     middleEntry.Item1,
                     middleEntry.Item2,
-                    ID,
-                    newRightNode.ID,
+                    Id,
+                    newRightNode.Id,
                     out insertPosition);
 
-                newRightNode.ParentID = parent.ID;
+                newRightNode.ParentId = parent.Id;
 
                 // If parent is overflow, split and update reference
                 if (parent.IsOverflow)
@@ -336,7 +333,7 @@ namespace CustomDatabase.Logic.Tree
         /// </summary>
         public TreeNode<K, V> GetChildNode(int index)
         {
-            return nodeManager.Find(childrenIDs[index]);
+            return nodeManager.Find(childrenIds[index]);
         }
 
         /// <summary>
@@ -362,20 +359,20 @@ namespace CustomDatabase.Logic.Tree
             if (IsLeaf)
             {
                 return string.Format("[Node: ID={0}, ParentID={1}, Entries={2}]",
-                    ID,
-                    ParentID,
+                    Id,
+                    ParentId,
                     String.Join(",", numbers)
                     );
             }
             else
             {
-                var IDs = (from id in this.childrenIDs select id.ToString()).ToArray();
+                var ids = (from id in this.childrenIds select id.ToString()).ToArray();
                
                 return string.Format("[Node: ID={0}, ParentID={1}, Entries={2}, Children={3}]",
-                    ID,
-                    ParentID,
+                    Id,
+                    ParentId,
                     String.Join(",", numbers),
-                    String.Join(",", IDs)
+                    String.Join(",", ids)
                     );
             }
         }
@@ -390,7 +387,7 @@ namespace CustomDatabase.Logic.Tree
             // If deficient node's right sibling exists and has more than minimum
             // number of elements, rotate left.
             int indexInParent = IndexInParent();
-            var parent = nodeManager.Find(parentID);
+            var parent = nodeManager.Find(parentId);
             var rightSibling = ((indexInParent + 1) < parent.ChildrenNodeCount) ? parent.GetChildNode(indexInParent + 1) : null;
 
             if (rightSibling != null && rightSibling.EntriesCount > nodeManager.MinEntriesPerNode)
@@ -407,13 +404,13 @@ namespace CustomDatabase.Logic.Tree
                 // Move the first child reference from right sibling.
                 if (!rightSibling.IsLeaf)
                 {
-                    var node = nodeManager.Find(rightSibling.childrenIDs[0]);
+                    var node = nodeManager.Find(rightSibling.childrenIds[0]);
 
-                    node.parentID = this.ID;
+                    node.parentId = this.Id;
                     nodeManager.MarkAsChanged(node);
 
-                    childrenIDs.Add(rightSibling.childrenIDs[0]);
-                    rightSibling.childrenIDs.RemoveAt(0);
+                    childrenIds.Add(rightSibling.childrenIds[0]);
+                    rightSibling.childrenIds.RemoveAt(0);
                 }
 
                 nodeManager.MarkAsChanged(this);
@@ -440,13 +437,13 @@ namespace CustomDatabase.Logic.Tree
                 // Move the last child reference from left sibling.
                 if (!leftSibling.IsLeaf)
                 {
-                    var node = nodeManager.Find(leftSibling.childrenIDs[leftSibling.entries.Count - 1]);
+                    var node = nodeManager.Find(leftSibling.childrenIds[leftSibling.entries.Count - 1]);
 
-                    node.parentID = this.ID;
+                    node.parentId = this.Id;
                     nodeManager.MarkAsChanged(node);
 
-                    childrenIDs.Insert(0, leftSibling.childrenIDs[leftSibling.entries.Count - 1]);
-                    leftSibling.childrenIDs.RemoveAt(leftSibling.entries.Count - 1);
+                    childrenIds.Insert(0, leftSibling.childrenIds[leftSibling.entries.Count - 1]);
+                    leftSibling.childrenIds.RemoveAt(leftSibling.entries.Count - 1);
                 }
 
                 nodeManager.MarkAsChanged(this);
@@ -466,32 +463,32 @@ namespace CustomDatabase.Logic.Tree
 
             // Move all elements from right node to the left one.
             leftChild.entries.AddRange(rightChild.entries);
-            leftChild.childrenIDs.AddRange(rightChild.childrenIDs);
+            leftChild.childrenIds.AddRange(rightChild.childrenIds);
 
-            foreach (var id in rightChild.childrenIDs)
+            foreach (var id in rightChild.childrenIds)
             {
                 var n = nodeManager.Find(id);
 
-                n.parentID = leftChild.ID;
+                n.parentId = leftChild.Id;
                 nodeManager.MarkAsChanged(n);
             }
 
             // Remove separator and the empty right child from the parent.
             parent.entries.RemoveAt(parentSeparatorIndex);
-            parent.childrenIDs.RemoveAt(parentSeparatorIndex + 1);
+            parent.childrenIds.RemoveAt(parentSeparatorIndex + 1);
             nodeManager.Delete(rightChild);
 
             // If parent is the root and has no elements,
             // free it and make the merge node into the new root.
             // Otherwise, if parent has fewer than required number of elements, rebalance.
-            if (parent.parentID == 0 && parent.EntriesCount == 0)
+            if (parent.parentId == 0 && parent.EntriesCount == 0)
             {
-                leftChild.parentID = 0;
+                leftChild.parentId = 0;
                 nodeManager.MarkAsChanged(leftChild);
                 nodeManager.MakeRoot(leftChild);
                 nodeManager.Delete(parent);
             }
-            else if (parent.parentID != 0 && parent.EntriesCount < nodeManager.MinEntriesPerNode)
+            else if (parent.parentId != 0 && parent.EntriesCount < nodeManager.MinEntriesPerNode)
             {
                 nodeManager.MarkAsChanged(leftChild);
                 nodeManager.MarkAsChanged(parent);

@@ -1,27 +1,25 @@
-﻿using CustomDatabase.Interfaces;
+using CustomDatabase.Interfaces;
 using CustomDatabase.Helpers;
-using System;
-using System.IO;
 
 namespace CustomDatabase.Logic
 {
     public class Block : IBlock
     {
         #region Variables
-        readonly byte[] firstSector;
-        readonly long?[] cachedHeaderValue = new long?[5];
-        readonly Stream stream;
-        readonly BlockStorage storage;
-        readonly uint id;
+        private readonly byte[] firstSector;
+        private readonly long?[] cachedHeaderValue = new long?[5];
+        private readonly Stream stream;
+        private readonly BlockStorage storage;
+        private readonly uint id;
 
-        bool isFirstSectorDirty = false;
-        bool isDisposed = false;
+        private bool isFirstSectorDirty = false;
+        private bool isDisposed = false;
 
         public event EventHandler Disposed;
         #endregion Variables
         
         #region Properties
-        public uint ID
+        public uint Id
         {
             get { return id; }
         }
@@ -82,31 +80,31 @@ namespace CustomDatabase.Logic
             isFirstSectorDirty = true;
         }
 
-        public void Read(byte[] dst, int dstOffset, int srcOffset, int count)
+        public void Read(byte[] destination, int destinationOffset, int sourceOffset, int count)
         {
             if (isDisposed)
             { throw new ObjectDisposedException("Block"); }
 
             // Validate argument
-            if (false == ((count >= 0) && ((count + srcOffset) <= storage.BlockContentSize)))
+            if (false == ((count >= 0) && ((count + sourceOffset) <= storage.BlockContentSize)))
             { throw new ArgumentOutOfRangeException("Requested count is outside of src bounds. Count: " + count, "count"); } // TODO move error handling to a centralized place
 
-            if (false == ((count + dstOffset) <= dst.Length))
+            if (false == ((count + destinationOffset) <= destination.Length))
             { throw new ArgumentOutOfRangeException("Requested count is outside dest bounds. Count: " + count); }
 
             // If part of the remaining data belongs to the firstSector buffer
             // start by copying from firstSector
             int dataCopied = 0;
-            bool copyFromFirstSector = (storage.BlockHeaderSize + srcOffset) < storage.DiskSectorSize;
+            bool copyFromFirstSector = (storage.BlockHeaderSize + sourceOffset) < storage.DiskSectorSize;
 
             if (copyFromFirstSector)
             {
-                int toCopy = Math.Min(storage.DiskSectorSize - storage.BlockHeaderSize - srcOffset, count);
+                int toCopy = Math.Min(storage.DiskSectorSize - storage.BlockHeaderSize - sourceOffset, count);
 
                 Buffer.BlockCopy(src: firstSector,
-                    srcOffset: storage.BlockHeaderSize + srcOffset,
-                    dst: dst,
-                    dstOffset: dstOffset,
+                    srcOffset: storage.BlockHeaderSize + sourceOffset,
+                    dst: destination,
+                    dstOffset: destinationOffset,
                     count: toCopy);
 
                 dataCopied += toCopy;
@@ -116,16 +114,16 @@ namespace CustomDatabase.Logic
             if (dataCopied < count)
             {
                 if (copyFromFirstSector)
-                { stream.Position = (ID * storage.BlockSize) + storage.DiskSectorSize; }
+                { stream.Position = (Id * storage.BlockSize) + storage.DiskSectorSize; }
                 else
-                { stream.Position = (ID * storage.BlockSize) + storage.BlockHeaderSize * srcOffset; }
+                { stream.Position = (Id * storage.BlockSize) + storage.BlockHeaderSize * sourceOffset; }
             }
 
             // Start copying until all done
             while (dataCopied < count)
             {
                 int bytesToRead = Math.Min(storage.DiskSectorSize, count - dataCopied);
-                int thisRead = stream.Read(dst, dstOffset + dataCopied, bytesToRead);
+                int thisRead = stream.Read(destination, destinationOffset + dataCopied, bytesToRead);
 
                 if (thisRead == 0)
                 { throw new EndOfStreamException(); }
@@ -134,45 +132,45 @@ namespace CustomDatabase.Logic
             }
         }
 
-        public void Write(byte[] src, int srcOffset, int dstOffset, int count)
+        public void Write(byte[] source, int sourceOffset, int destinationOffset, int count)
         {
             if (isDisposed)
             { throw new ObjectDisposedException("Block"); }
 
             // Validate argument
-            if (false == ((dstOffset >= 0) && ((count + dstOffset) <= storage.BlockContentSize)))
+            if (false == ((destinationOffset >= 0) && ((count + destinationOffset) <= storage.BlockContentSize)))
             { throw new ArgumentOutOfRangeException("Requested count is outside of dst bounds. Count: " + count, "count"); }
 
-            if (false == ((count + srcOffset) <= src.Length))
+            if (false == ((count + sourceOffset) <= source.Length))
             { throw new ArgumentOutOfRangeException("Requested count is outside src bounds. Count: " + count); }
 
             // Write bytes that belong to the firstSector
-            if ((storage.BlockHeaderSize + dstOffset) < storage.DiskSectorSize)
+            if ((storage.BlockHeaderSize + destinationOffset) < storage.DiskSectorSize)
             {
-                int thisWrite = Math.Min(count, storage.DiskSectorSize - storage.BlockHeaderSize - dstOffset);
+                int thisWrite = Math.Min(count, storage.DiskSectorSize - storage.BlockHeaderSize - destinationOffset);
                 
-                Buffer.BlockCopy(src: src,
-                    srcOffset: srcOffset,
+                Buffer.BlockCopy(src: source,
+                    srcOffset: sourceOffset,
                     dst: firstSector,
-                    dstOffset: storage.BlockHeaderSize + dstOffset,
+                    dstOffset: storage.BlockHeaderSize + destinationOffset,
                     count: thisWrite);
 
                 isFirstSectorDirty = true;
             }
 
             // Write bytes that don't belong to the firstSector
-            if ((storage.BlockHeaderSize + dstOffset + count) > storage.DiskSectorSize)
+            if ((storage.BlockHeaderSize + destinationOffset + count) > storage.DiskSectorSize)
             {
                 // Move stream to correct position in prep for writing
-                this.stream.Position = (ID * storage.BlockSize) + Math.Max(storage.DiskSectorSize, storage.BlockHeaderSize + dstOffset);
+                this.stream.Position = (Id * storage.BlockSize) + Math.Max(storage.DiskSectorSize, storage.BlockHeaderSize + destinationOffset);
 
                 // Exclude bytes already written in firstSector
-                int firstSectorData = storage.DiskSectorSize - (storage.BlockHeaderSize + dstOffset);
+                int firstSectorData = storage.DiskSectorSize - (storage.BlockHeaderSize + destinationOffset);
                 
                 if (firstSectorData > 0)
                 {
-                    dstOffset += firstSectorData;
-                    srcOffset += firstSectorData;
+                    destinationOffset += firstSectorData;
+                    sourceOffset += firstSectorData;
                     count -= firstSectorData;
                 }
 
@@ -181,7 +179,7 @@ namespace CustomDatabase.Logic
                 while (written < count)
                 {
                     int bytesToWrite = Math.Min(4096, count - written);
-                    this.stream.Write(src, srcOffset + written, bytesToWrite);
+                    this.stream.Write(source, sourceOffset + written, bytesToWrite);
                     this.stream.Flush();
                     written += bytesToWrite;
                 }
@@ -191,7 +189,7 @@ namespace CustomDatabase.Logic
         public override string ToString()
         {
             return string.Format("[Block: ID={0}, ContentLength={1}, Prev={2}, Next={3}]",
-                ID, GetHeader(2), GetHeader(3), GetHeader(0));
+                Id, GetHeader(2), GetHeader(3), GetHeader(0));
         }
         #endregion Methods (public)
 
@@ -230,7 +228,7 @@ namespace CustomDatabase.Logic
 
                 if (isFirstSectorDirty)
                 {
-                    this.stream.Position = ID * storage.BlockSize;
+                    this.stream.Position = Id * storage.BlockSize;
                     this.stream.Write(firstSector, 0, 4096);
                     this.stream.Flush();
                     isFirstSectorDirty = false;

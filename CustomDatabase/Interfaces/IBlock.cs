@@ -1,5 +1,3 @@
-﻿using System;
-
 namespace CustomDatabase.Interfaces
 {
     public interface IBlock : IDisposable
@@ -7,7 +5,7 @@ namespace CustomDatabase.Interfaces
         // <summary>
         // ID of the block, must be unique.
         // </summary>
-        uint ID { get; }
+        uint Id { get; }
 
         // <summary>
         // Block may contain one or more header metadata,
@@ -24,11 +22,11 @@ namespace CustomDatabase.Interfaces
         // <summary>
         // Read content of this block (src) into given buffer (dst).
         // </summary>
-        void Read(byte[] dst, int dstOffset, int srcOffset, int count);
+        void Read(byte[] destination, int destinationOffset, int sourceOffset, int count);
 
         // <summary>
         // Write content of given buffer (src) into this (dst).
         // </summary>
-        void Write(byte[] src, int srcOffset, int dstOffset, int count);
+        void Write(byte[] source, int sourceOffset, int destinationOffset, int count);
     }
 }

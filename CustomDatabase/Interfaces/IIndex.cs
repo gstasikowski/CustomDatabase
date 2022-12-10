@@ -1,6 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-
 namespace CustomDatabase.Interfaces
 {
     public interface IIndex<K, V>

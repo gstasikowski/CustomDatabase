@@ -5,34 +5,34 @@ namespace CustomDatabase.Logic.Tree
     public class TreeMemoryNodeManager<K, V> : ITreeNodeManager<K, V>
     {
         #region Variables
-        private readonly Dictionary<uint, TreeNode<K, V>> nodes = new Dictionary<uint, TreeNode<K, V>>();
-        private readonly ushort minEntriesCountPerNode;
-        private readonly IComparer<K> keyComparer;
-        private readonly IComparer<Tuple<K, V>> entryComparer;
+        private readonly Dictionary<uint, TreeNode<K, V>> _nodes = new Dictionary<uint, TreeNode<K, V>>();
+        private readonly ushort _minEntriesCountPerNode;
+        private readonly IComparer<K> _keyComparer;
+        private readonly IComparer<Tuple<K, V>> _entryComparer;
 
-        private int idCounter = 1;
-        private TreeNode<K, V> rootNode;
+        private int _idCounter = 1;
+        private TreeNode<K, V> _rootNode;
         #endregion Variables
 
         #region Properties
         public ushort MinEntriesPerNode
         {
-            get { return minEntriesCountPerNode; }
+            get { return _minEntriesCountPerNode; }
         }
 
         public IComparer<K> KeyComparer
         {
-            get { return keyComparer; }
+            get { return _keyComparer; }
         }
 
         public IComparer<Tuple<K, V>> EntryComparer
         {
-            get { return entryComparer; }
+            get { return _entryComparer; }
         }
 
         public TreeNode<K, V> RootNode
         {
-            get { return rootNode; }
+            get { return _rootNode; }
         }
         #endregion Properties
 
@@ -41,54 +41,69 @@ namespace CustomDatabase.Logic.Tree
         /// <param name="keyComparer">Key comparer.</param>
         public TreeMemoryNodeManager(ushort minEntriesCountPerNode, IComparer<K> keyComparer)
         {
-            this.minEntriesCountPerNode = minEntriesCountPerNode;
-            this.keyComparer = keyComparer;
-            this.entryComparer = Comparer<Tuple<K, V>>.Create((t1, t2) =>
-            { return this.keyComparer.Compare(t1.Item1, t2.Item1); });
+            this._minEntriesCountPerNode = minEntriesCountPerNode;
+            this._keyComparer = keyComparer;
+            this._entryComparer = Comparer<Tuple<K, V>>.Create((t1, t2) =>
+            { return this._keyComparer.Compare(x: t1.Item1, y: t2.Item1); });
 
-            this.rootNode = Create(null, null);
+            this._rootNode = Create(entries: null, childrenIds: null);
         }
         #endregion Constructor
 
         #region Methods (public)
         public TreeNode<K, V> Create(IEnumerable<Tuple<K, V>> entries, IEnumerable<uint> childrenIds)
         {
-            var newNode = new TreeNode<K, V>(this, (uint)(this.idCounter++), 0, entries, childrenIds);
+            var newNode = new TreeNode<K, V>(
+                nodeManager: this,
+                id: (uint)(this._idCounter++),
+                parentId: 0,
+                entries: entries,
+                childrenIds: childrenIds
+            );
 
-            nodes[newNode.Id] = newNode;
+            _nodes[newNode.Id] = newNode;
 
             return newNode;
         }
 
         public TreeNode<K, V> Find(uint id)
         {
-            if (!nodes.ContainsKey(id))
-            { throw new ArgumentException("Node not found by ID: " + id); }
+            if (!_nodes.ContainsKey(id))
+            {
+                throw new ArgumentException(CommonResources.GetErrorMessage("NodeNotFoundById") + id);
+            }
 
-            return nodes[id];
+            return _nodes[id];
         }
 
         public TreeNode<K, V> CreateNewRoot(K key, V value, uint leftNodeId, uint rightNodeId)
         {
-            var newNode = Create(new Tuple<K, V>[] { new Tuple<K, V>(key, value) }, new uint[] { leftNodeId, rightNodeId });
+            var newNode = Create(
+                entries: new Tuple<K, V>[] { new Tuple<K, V>(item1: key, item2: value) },
+                childrenIds: new uint[] { leftNodeId, rightNodeId }
+            );
 
-            this.rootNode = newNode;
+            this._rootNode = newNode;
 
             return newNode;
         }
 
         public void Delete(TreeNode<K, V> target)
         {
-            if (target == rootNode)
-            { rootNode = null; }
+            if (target == _rootNode)
+            {
+                _rootNode = null;
+            }
 
-            if (nodes.ContainsKey(target.Id))
-            { nodes.Remove(target.Id); }
+            if (_nodes.ContainsKey(target.Id))
+            {
+                _nodes.Remove(target.Id);
+            }
         }
 
         public void MakeRoot(TreeNode<K, V> target)
         {
-            this.rootNode = target;
+            this._rootNode = target;
         }
 
         public void MarkAsChanged(TreeNode<K, V> target)

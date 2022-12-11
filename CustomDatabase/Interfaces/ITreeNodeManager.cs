@@ -8,27 +8,23 @@ namespace CustomDatabase.Interfaces
         /// Minimum number of entries per node.
         /// Maximum must be equal MinEntriesPerNode * 2
         /// </summary>
-        ushort MinEntriesPerNode
-        { get; }
+        ushort MinEntriesPerNode { get; }
 
         /// <summary>
         /// Get the comparer used to compare the keys.
         /// </summary>
-        IComparer<K> KeyComparer
-        { get; }
+        IComparer<K> KeyComparer { get; }
 
         /// <summary>
         /// Get the comparer used to compare entries.
         /// Must use KeyComparer declared above.
         /// </summary>
-        IComparer<Tuple<K, V>> EntryComparer
-        { get; }
+        IComparer<Tuple<K, V>> EntryComparer { get; }
 
         /// <summary>
         /// Get the root node - must be cached as it always gets called.
         /// </summary>
-        TreeNode<K, V> RootNode
-        { get; }
+        TreeNode<K, V> RootNode { get; }
 
         /// <summary>
         /// Creates a new node that carries given entries 

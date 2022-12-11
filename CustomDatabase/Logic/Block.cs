@@ -6,14 +6,14 @@ namespace CustomDatabase.Logic
     public class Block : IBlock
     {
         #region Variables
-        private readonly byte[] firstSector;
-        private readonly long?[] cachedHeaderValue = new long?[5];
-        private readonly Stream stream;
-        private readonly BlockStorage storage;
-        private readonly uint id;
+        private readonly byte[] _firstSector;
+        private readonly long?[] _cachedHeaderValue = new long?[5];
+        private readonly Stream _stream;
+        private readonly BlockStorage _storage;
+        private readonly uint _id;
 
-        private bool isFirstSectorDirty = false;
-        private bool isDisposed = false;
+        private bool _isFirstSectorDirty = false;
+        private bool _isDisposed = false;
 
         public event EventHandler Disposed;
         #endregion Variables
@@ -21,7 +21,7 @@ namespace CustomDatabase.Logic
         #region Properties
         public uint Id
         {
-            get { return id; }
+            get { return _id; }
         }
         #endregion Properties
 
@@ -29,18 +29,26 @@ namespace CustomDatabase.Logic
         public Block(BlockStorage storage, uint id, byte[] firstSector, Stream stream)
         {
             if (stream == null)
-            { throw new ArgumentNullException("stream"); }
+            {
+                throw new ArgumentNullException("stream");
+            }
 
             if (firstSector == null)
-            { throw new ArgumentNullException("firstSector"); }
+            {
+                throw new ArgumentNullException("firstSector");
+            }
 
             if (firstSector.Length != storage.DiskSectorSize)
-            { throw new ArgumentException("first sector length must be: " + storage.DiskSectorSize); }
+            {
+                throw new ArgumentException(
+                    CommonResources.GetErrorMessage("WrongFirstSectorLength") + storage.DiskSectorSize
+                );
+            }
 
-            this.storage = storage;
-            this.id = id;
-            this.firstSector = firstSector;
-            this.stream = stream;
+            this._storage = storage;
+            this._id = id;
+            this._firstSector = firstSector;
+            this._stream = stream;
         }
         #endregion Constructor
 
@@ -49,21 +57,30 @@ namespace CustomDatabase.Logic
         {
             ValidateBlock(field); 
 
-            if (field >= (storage.BlockHeaderSize/8))
-            { throw new ArgumentException("Invalid field: " + field); }
+            if (field >= (_storage.BlockHeaderSize / 8))
+            {
+                throw new ArgumentException(
+                    CommonResources.GetErrorMessage("InvalidField") + field
+                );
+            }
             
 
             // Check (and return) if alread in cache
-            if (field < cachedHeaderValue.Length)
+            if (field < _cachedHeaderValue.Length)
             {
-                if (cachedHeaderValue[field] == null)
-                { cachedHeaderValue[field] = BufferHelper.ReadBufferInt64(firstSector, field * 8); }
+                if (_cachedHeaderValue[field] == null)
+                { 
+                    _cachedHeaderValue[field] = BufferHelper.ReadBufferInt64(
+                        buffer: _firstSector,
+                        bufferOffset: field * 8
+                    );
+                }
 
-                return (long)cachedHeaderValue[field];
+                return (long)_cachedHeaderValue[field];
             }
             else
             {
-                return BufferHelper.ReadBufferInt64(firstSector, field * 8);
+                return BufferHelper.ReadBufferInt64(buffer: _firstSector, bufferOffset: field * 8);
             }
         }
 
@@ -72,40 +89,57 @@ namespace CustomDatabase.Logic
             ValidateBlock(field);
 
             // Update cache if this field is cached
-            if (field < cachedHeaderValue.Length)
-            { cachedHeaderValue[field] = value; }
+            if (field < _cachedHeaderValue.Length)
+            {
+                _cachedHeaderValue[field] = value;
+            }
 
             // Write to cache buffer
-            BufferHelper.WriteBuffer(value, firstSector, field * 8);
-            isFirstSectorDirty = true;
+            BufferHelper.WriteBuffer(value: value, buffer: _firstSector, bufferOffset: field * 8);
+            _isFirstSectorDirty = true;
         }
 
         public void Read(byte[] destination, int destinationOffset, int sourceOffset, int count)
         {
-            if (isDisposed)
+            if (_isDisposed)
             { throw new ObjectDisposedException("Block"); }
 
             // Validate argument
-            if (false == ((count >= 0) && ((count + sourceOffset) <= storage.BlockContentSize)))
-            { throw new ArgumentOutOfRangeException("Requested count is outside of src bounds. Count: " + count, "count"); } // TODO move error handling to a centralized place
+            if (false == ((count >= 0) && ((count + sourceOffset) <= _storage.BlockContentSize)))
+            {
+                throw new ArgumentOutOfRangeException(
+                    paramName: CommonResources.GetErrorMessage("SourceOutOfBounds") + count,
+                    message: "count"
+                );
+            }
 
             if (false == ((count + destinationOffset) <= destination.Length))
-            { throw new ArgumentOutOfRangeException("Requested count is outside dest bounds. Count: " + count); }
+            {
+                throw new ArgumentOutOfRangeException(
+                    paramName: CommonResources.GetErrorMessage("DestinationOutOfBounds") + count,
+                    message: "count"
+                );
+            }
 
             // If part of the remaining data belongs to the firstSector buffer
             // start by copying from firstSector
             int dataCopied = 0;
-            bool copyFromFirstSector = (storage.BlockHeaderSize + sourceOffset) < storage.DiskSectorSize;
+            bool copyFromFirstSector = (_storage.BlockHeaderSize + sourceOffset) < _storage.DiskSectorSize;
 
             if (copyFromFirstSector)
             {
-                int toCopy = Math.Min(storage.DiskSectorSize - storage.BlockHeaderSize - sourceOffset, count);
+                int toCopy = Math.Min(
+                    val1: _storage.DiskSectorSize - _storage.BlockHeaderSize - sourceOffset,
+                    val2: count
+                );
 
-                Buffer.BlockCopy(src: firstSector,
-                    srcOffset: storage.BlockHeaderSize + sourceOffset,
+                Buffer.BlockCopy(
+                    src: _firstSector,
+                    srcOffset: _storage.BlockHeaderSize + sourceOffset,
                     dst: destination,
                     dstOffset: destinationOffset,
-                    count: toCopy);
+                    count: toCopy
+                );
 
                 dataCopied += toCopy;
             }
@@ -114,19 +148,29 @@ namespace CustomDatabase.Logic
             if (dataCopied < count)
             {
                 if (copyFromFirstSector)
-                { stream.Position = (Id * storage.BlockSize) + storage.DiskSectorSize; }
+                {
+                    _stream.Position = (Id * _storage.BlockSize) + _storage.DiskSectorSize;
+                }
                 else
-                { stream.Position = (Id * storage.BlockSize) + storage.BlockHeaderSize * sourceOffset; }
+                {
+                    _stream.Position = (Id * _storage.BlockSize) + _storage.BlockHeaderSize * sourceOffset;
+                }
             }
 
             // Start copying until all done
             while (dataCopied < count)
             {
-                int bytesToRead = Math.Min(storage.DiskSectorSize, count - dataCopied);
-                int thisRead = stream.Read(destination, destinationOffset + dataCopied, bytesToRead);
+                int bytesToRead = Math.Min(val1: _storage.DiskSectorSize, val2: count - dataCopied);
+                int thisRead = _stream.Read(
+                    buffer: destination,
+                    offset: destinationOffset + dataCopied,
+                    count: bytesToRead
+                );
 
                 if (thisRead == 0)
-                { throw new EndOfStreamException(); }
+                {
+                    throw new EndOfStreamException();
+                }
 
                 dataCopied += thisRead;
             }
@@ -134,38 +178,58 @@ namespace CustomDatabase.Logic
 
         public void Write(byte[] source, int sourceOffset, int destinationOffset, int count)
         {
-            if (isDisposed)
-            { throw new ObjectDisposedException("Block"); }
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException("Block");
+            }
 
             // Validate argument
-            if (false == ((destinationOffset >= 0) && ((count + destinationOffset) <= storage.BlockContentSize)))
-            { throw new ArgumentOutOfRangeException("Requested count is outside of dst bounds. Count: " + count, "count"); }
+            if (false == ((destinationOffset >= 0) && ((count + destinationOffset) <= _storage.BlockContentSize)))
+            {
+                throw new ArgumentOutOfRangeException(
+                    paramName: CommonResources.GetErrorMessage("DestinationOutOfBounds") + count,
+                    message: "count"
+                );
+            }
 
             if (false == ((count + sourceOffset) <= source.Length))
-            { throw new ArgumentOutOfRangeException("Requested count is outside src bounds. Count: " + count); }
+            {
+                throw new ArgumentOutOfRangeException(
+                    paramName: CommonResources.GetErrorMessage("SourceOutOfBounds") + count,
+                    message: "count"
+                );
+            }
 
             // Write bytes that belong to the firstSector
-            if ((storage.BlockHeaderSize + destinationOffset) < storage.DiskSectorSize)
+            if ((_storage.BlockHeaderSize + destinationOffset) < _storage.DiskSectorSize)
             {
-                int thisWrite = Math.Min(count, storage.DiskSectorSize - storage.BlockHeaderSize - destinationOffset);
+                int thisWrite = Math.Min(
+                    val1: count,
+                    val2: _storage.DiskSectorSize - _storage.BlockHeaderSize - destinationOffset
+                );
                 
-                Buffer.BlockCopy(src: source,
+                Buffer.BlockCopy(
+                    src: source,
                     srcOffset: sourceOffset,
-                    dst: firstSector,
-                    dstOffset: storage.BlockHeaderSize + destinationOffset,
-                    count: thisWrite);
+                    dst: _firstSector,
+                    dstOffset: _storage.BlockHeaderSize + destinationOffset,
+                    count: thisWrite
+                );
 
-                isFirstSectorDirty = true;
+                _isFirstSectorDirty = true;
             }
 
             // Write bytes that don't belong to the firstSector
-            if ((storage.BlockHeaderSize + destinationOffset + count) > storage.DiskSectorSize)
+            if ((_storage.BlockHeaderSize + destinationOffset + count) > _storage.DiskSectorSize)
             {
                 // Move stream to correct position in prep for writing
-                this.stream.Position = (Id * storage.BlockSize) + Math.Max(storage.DiskSectorSize, storage.BlockHeaderSize + destinationOffset);
+                this._stream.Position = (Id * _storage.BlockSize) + Math.Max(
+                    val1: _storage.DiskSectorSize,
+                    val2: _storage.BlockHeaderSize + destinationOffset
+                );
 
                 // Exclude bytes already written in firstSector
-                int firstSectorData = storage.DiskSectorSize - (storage.BlockHeaderSize + destinationOffset);
+                int firstSectorData = _storage.DiskSectorSize - (_storage.BlockHeaderSize + destinationOffset);
                 
                 if (firstSectorData > 0)
                 {
@@ -178,9 +242,9 @@ namespace CustomDatabase.Logic
                 int written = 0;
                 while (written < count)
                 {
-                    int bytesToWrite = Math.Min(4096, count - written);
-                    this.stream.Write(source, sourceOffset + written, bytesToWrite);
-                    this.stream.Flush();
+                    int bytesToWrite = Math.Min(val1: 4096, val2: count - written);
+                    this._stream.Write(buffer: source, offset: sourceOffset + written, count: bytesToWrite);
+                    this._stream.Flush();
                     written += bytesToWrite;
                 }
             }
@@ -188,30 +252,41 @@ namespace CustomDatabase.Logic
 
         public override string ToString()
         {
-            return string.Format("[Block: ID={0}, ContentLength={1}, Prev={2}, Next={3}]",
-                Id, GetHeader(2), GetHeader(3), GetHeader(0));
+            return string.Format(
+                "[Block: ID={0}, ContentLength={1}, Prev={2}, Next={3}]",
+                Id,
+                GetHeader(2),
+                GetHeader(3),
+                GetHeader(0)
+            );
         }
         #endregion Methods (public)
-
-        #region Methods (private)
-        private void ValidateBlock(int field)
-        {
-            if (isDisposed)
-            { throw new ObjectDisposedException("Block"); }
-
-            // Validate field number
-            if (field < 0)
-            { throw new IndexOutOfRangeException(); }
-        }
-        #endregion Methods (private)
 
         #region Methods (protected)
         protected virtual void OnDisposed(EventArgs e)
         {
             if (Disposed != null)
-            { Disposed(this, e); }
+            {
+                Disposed(this, e);
+            }
         }
         #endregion Methods (protected)
+
+        #region Methods (private)
+        private void ValidateBlock(int field)
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException("Block");
+            }
+
+            // Validate field number
+            if (field < 0)
+            {
+                throw new IndexOutOfRangeException();
+            }
+        }
+        #endregion Methods (private)
 
         #region Dispose
         public void Dispose()
@@ -222,16 +297,16 @@ namespace CustomDatabase.Logic
 
         public virtual void Dispose(bool disposing)
         {
-            if (disposing && !isDisposed)
+            if (disposing && !_isDisposed)
             {
-                isDisposed = true;
+                _isDisposed = true;
 
-                if (isFirstSectorDirty)
+                if (_isFirstSectorDirty)
                 {
-                    this.stream.Position = Id * storage.BlockSize;
-                    this.stream.Write(firstSector, 0, 4096);
-                    this.stream.Flush();
-                    isFirstSectorDirty = false;
+                    this._stream.Position = Id * _storage.BlockSize;
+                    this._stream.Write(buffer: _firstSector, offset: 0, count: 4096);
+                    this._stream.Flush();
+                    _isFirstSectorDirty = false;
                 }
 
                 OnDisposed(EventArgs.Empty);

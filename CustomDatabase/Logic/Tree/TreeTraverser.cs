@@ -7,32 +7,41 @@ namespace CustomDatabase.Logic.Tree
     public class TreeTraverser<K, V> : IEnumerable<Tuple<K, V>>
     {
         #region Variables
-        private readonly TreeNode<K, V> fromNode;
-        private readonly int fromIndex;
-        private readonly TreeTraverseDirection direction;
-        private readonly ITreeNodeManager<K, V> nodeManager;
+        private readonly TreeNode<K, V> _fromNode;
+        private readonly int _fromIndex;
+        private readonly TreeTraverseDirection _direction;
+        private readonly ITreeNodeManager<K, V> _nodeManager;
         #endregion Variables
 
         #region Constructor
-        public TreeTraverser(ITreeNodeManager<K, V> nodeManager,
+        public TreeTraverser(
+            ITreeNodeManager<K, V> nodeManager,
             TreeNode<K, V> fromNode,
             int fromIndex,
-            TreeTraverseDirection direction)
+            TreeTraverseDirection direction
+        )
         {
             if (fromNode == null)
-            { throw new ArgumentNullException("fromNode"); }
+            {
+                throw new ArgumentNullException("fromNode");
+            }
 
-            this.nodeManager = nodeManager;
-            this.fromNode = fromNode;
-            this.fromIndex = fromIndex;
-            this.direction = direction;
+            this._nodeManager = nodeManager;
+            this._fromNode = fromNode;
+            this._fromIndex = fromIndex;
+            this._direction = direction;
         }
         #endregion Constructor
 
         #region Properties
         public IEnumerator<Tuple<K, V>> GetEnumerator()
         {
-            return new TreeEnumerator<K, V>(nodeManager, fromNode, fromIndex, direction);
+            return new TreeEnumerator<K, V>(
+                nodeManager: _nodeManager,
+                node: _fromNode,
+                fromIndex: _fromIndex,
+                direction: _direction
+            );
         }
 
         IEnumerator IEnumerable.GetEnumerator()

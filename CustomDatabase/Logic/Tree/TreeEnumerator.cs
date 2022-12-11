@@ -7,24 +7,24 @@ namespace CustomDatabase.Logic.Tree
     public class TreeEnumerator<K, V> : IEnumerator<Tuple<K, V>>
     {
         #region Variables
-        private readonly ITreeNodeManager<K, V> nodeManager;
-        private readonly TreeTraverseDirection direction;
+        private readonly ITreeNodeManager<K, V> _nodeManager;
+        private readonly TreeTraverseDirection _direction;
 
-        private bool isDoneIterating = false;
-        private int currentEntry = 0;
-        private TreeNode<K, V> currentNode;
-        private Tuple<K, V> current;
+        private bool _isDoneIterating = false;
+        private int _currentEntry = 0;
+        private TreeNode<K, V> _currentNode;
+        private Tuple<K, V> _current;
         #endregion Variables
 
         #region Properties
         public TreeNode<K, V> CurrentNode
         {
-            get { return currentNode; }
+            get { return _currentNode; }
         }
 
         public int CurrentEntry
         {
-            get { return currentEntry; }
+            get { return _currentEntry; }
         }
 
         object IEnumerator.Current
@@ -34,140 +34,43 @@ namespace CustomDatabase.Logic.Tree
 
         public Tuple<K, V> Current
         {
-            get { return current; }
+            get { return _current; }
         }
         #endregion Properties
 
         #region Constructor
-        public TreeEnumerator(ITreeNodeManager<K, V> nodeManager,
+        public TreeEnumerator(
+            ITreeNodeManager<K, V> nodeManager,
             TreeNode<K, V> node,
             int fromIndex,
-            TreeTraverseDirection direction)
+            TreeTraverseDirection direction
+        )
         {
-            this.nodeManager = nodeManager;
-            this.currentNode = node;
-            this.currentEntry = fromIndex;
-            this.direction = direction;
+            this._nodeManager = nodeManager;
+            this._currentNode = node;
+            this._currentEntry = fromIndex;
+            this._direction = direction;
         }
         #endregion Constructor
 
         #region Methods (public)
         public bool MoveNext()
         {
-            if (isDoneIterating)
-            { return false; }
+            if (_isDoneIterating)
+            {
+                return false;
+            }
 
-            switch (this.direction)
+            switch (this._direction)
             {
                 case TreeTraverseDirection.Ascending:
                     return MoveForward();
+
                 case TreeTraverseDirection.Descending:
                     return MoveBackward();
+
                 default:
                     throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        bool MoveForward()
-        {
-            // For leaf node: move either right or up.
-            // For parent node: always move right & down.
-            if (currentNode.IsLeaf)
-            {
-                // Start by moving right.
-                currentEntry++;
-
-                while (true)
-                {
-                    // Return if current entry is valid,
-                    // If can't move right then up.
-                    // If can't move up, stop iterating.
-                    if (currentEntry < currentNode.EntriesCount)
-                    {
-                        current = currentNode.GetEntry(currentEntry);
-                        return true;
-                    }
-                    else if (currentNode.ParentId != 0)
-                    {
-                        currentEntry = currentNode.IndexInParent();
-                        currentNode = nodeManager.Find(currentNode.ParentId);
-
-                        if (currentEntry < 0 || currentNode == null)
-                        { throw new Exception("Something gone wrong with BTree."); }
-                    }
-                    else
-                    {
-                        current = null;
-                        isDoneIterating = true;
-                        return false;
-                    }
-                }
-            }
-            else
-            {
-                currentEntry++;
-
-                do
-                {
-                    currentNode = currentNode.GetChildNode(currentEntry);
-                    currentEntry = 0;
-                } while (!currentNode.IsLeaf);
-
-                current = currentNode.GetEntry(currentEntry);
-                return true;
-            }
-        }
-
-        bool MoveBackward()
-        {
-            // For leaf node: move either right or up.
-            // For parent node: always move left & down.
-            if (currentNode.IsLeaf)
-            {
-                // Start by moving left.
-                currentEntry--;
-
-                while (true)
-                {
-                    // Return if current entry is valid.
-                    // If can't move left then up.
-                    // If can't move up, stop iterating.
-                    if (currentEntry >= 0)
-                    {
-                        current = currentNode.GetEntry(currentEntry);
-                        return true;
-                    }
-                    else if (currentNode.ParentId != 0)
-                    {
-                        currentEntry = currentNode.IndexInParent() - 1;
-                        currentNode = nodeManager.Find(currentNode.ParentId);
-
-                        if (currentNode == null)
-                        { throw new Exception("Something gone wrong with BTree."); }
-                    }
-                    else
-                    {
-                        current = null;
-                        isDoneIterating = true;
-                        return false;
-                    }
-                }
-            }
-            else
-            {
-                currentEntry--;
-
-                do
-                {
-                    currentNode = currentNode.GetChildNode(currentEntry);
-                    currentEntry = currentNode.EntriesCount;
-
-                    if (currentEntry < 0 || currentNode == null)
-                    { throw new Exception("Something gone wrong with BTree."); }
-                } while (!currentNode.IsLeaf);
-
-                current = currentNode.GetEntry(currentEntry);
-                return true;
             }
         }
 
@@ -179,5 +82,116 @@ namespace CustomDatabase.Logic.Tree
         public void Dispose()
         { }
         #endregion Methods (public)
+
+        #region Methods (private)
+        private bool MoveForward()
+        {
+            // For leaf node: move either right or up.
+            // For parent node: always move right & down.
+            if (_currentNode.IsLeaf)
+            {
+                // Start by moving right.
+                _currentEntry++;
+
+                while (true)
+                {
+                    // Return if current entry is valid,
+                    // If can't move right then up.
+                    // If can't move up, stop iterating.
+                    if (_currentEntry < _currentNode.EntriesCount)
+                    {
+                        _current = _currentNode.GetEntry(_currentEntry);
+                        return true;
+                    }
+                    else if (_currentNode.ParentId != 0)
+                    {
+                        _currentEntry = _currentNode.IndexInParent();
+                        _currentNode = _nodeManager.Find(_currentNode.ParentId);
+
+                        if (_currentEntry < 0 || _currentNode == null)
+                        {
+                            throw new Exception(CommonResources.GetErrorMessage("BTreeIssue"));
+                        }
+                    }
+                    else
+                    {
+                        _current = null;
+                        _isDoneIterating = true;
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                _currentEntry++;
+
+                do
+                {
+                    _currentNode = _currentNode.GetChildNode(_currentEntry);
+                    _currentEntry = 0;
+                } while (!_currentNode.IsLeaf);
+
+                _current = _currentNode.GetEntry(_currentEntry);
+                return true;
+            }
+        }
+
+        private bool MoveBackward()
+        {
+            // For leaf node: move either right or up.
+            // For parent node: always move left & down.
+            if (_currentNode.IsLeaf)
+            {
+                // Start by moving left.
+                _currentEntry--;
+
+                while (true)
+                {
+                    // Return if current entry is valid.
+                    // If can't move left then up.
+                    // If can't move up, stop iterating.
+                    if (_currentEntry >= 0)
+                    {
+                        _current = _currentNode.GetEntry(_currentEntry);
+                        return true;
+                    }
+                    else if (_currentNode.ParentId != 0)
+                    {
+                        _currentEntry = _currentNode.IndexInParent() - 1;
+                        _currentNode = _nodeManager.Find(_currentNode.ParentId);
+
+                        if (_currentNode == null)
+                        {
+                            throw new Exception(CommonResources.GetErrorMessage("BTreeIssue"));
+                        }
+                    }
+                    else
+                    {
+                        _current = null;
+                        _isDoneIterating = true;
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                _currentEntry--;
+
+                do
+                {
+                    _currentNode = _currentNode.GetChildNode(_currentEntry);
+                    _currentEntry = _currentNode.EntriesCount;
+
+                    if (_currentEntry < 0 || _currentNode == null)
+                    {
+                        throw new Exception(CommonResources.GetErrorMessage("BTreeIssue"));
+                    }
+                } while (!_currentNode.IsLeaf);
+
+                _current = _currentNode.GetEntry(_currentEntry);
+                return true;
+            }
+        }
+        #endregion Methods (private)
     }
 }

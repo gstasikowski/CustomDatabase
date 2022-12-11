@@ -13,7 +13,7 @@ namespace TestApp
 			ShowMenu(dbFile);
 		}
 
-		static void ShowMenu(string dbFile)
+		private static void ShowMenu(string dbFile)
         {
 			Console.Clear();
 			Console.WriteLine("What do you want to do?\n1 - Quick test\n2 - Show all entries\n3 - Add new person\n4 - Find person by ID\n5 - Delete database files\n6 - Exit\n");
@@ -55,7 +55,7 @@ namespace TestApp
 			ShowMenu(dbFile);
 		}
 
-		static void QuickTest(string dbFile)
+		private static void QuickTest(string dbFile)
 		{
 			ClearDBFiles(dbFile);
 
@@ -88,7 +88,7 @@ namespace TestApp
 			ShowAllEntries(dbFile);
 		}
 
-		static void FindEntryById(string dbFile, string id)
+		private static void FindEntryById(string dbFile, string id)
 		{
 			// Reconstruct the database, to demonstrate that data is persistent
 			using (var db = new PeopleDatabase(dbFile))
@@ -104,7 +104,7 @@ namespace TestApp
 			Console.ReadKey();
 		}
 
-		static void ShowAllEntries(string dbFile)
+		private static void ShowAllEntries(string dbFile)
         {
 			// Reconstruct the database, to demonstrate that data is persistent
 			using (var db = new PeopleDatabase(dbFile))
@@ -122,7 +122,7 @@ namespace TestApp
 			}
 		}
 
-		static void AddPerson(string dbFile)
+		private static void AddPerson(string dbFile)
 		{
 			var person = new PersonModel();
 
@@ -147,7 +147,7 @@ namespace TestApp
 			}
 		}
 
-		static void ClearDBFiles(string dbFile)
+		private static void ClearDBFiles(string dbFile)
         {
 			if (File.Exists(dbFile))
 			{

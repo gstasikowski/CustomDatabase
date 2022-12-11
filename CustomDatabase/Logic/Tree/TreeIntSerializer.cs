@@ -21,9 +21,11 @@ namespace CustomDatabase.Logic.Tree
         public uint Deserialize(byte[] buffer, int offset, int length)
         {
             if (length != 4)
-            { throw new ArgumentException("Invalid length: " + length); }
+            {
+                throw new ArgumentException(CommonResources.GetErrorMessage("InvalidLength") + length);
+            }
 
-            return BufferHelper.ReadBufferUInt32(buffer, offset);
+            return BufferHelper.ReadBufferUInt32(buffer: buffer, bufferOffset: offset);
         }
 
         public byte[] Serialize(uint value)

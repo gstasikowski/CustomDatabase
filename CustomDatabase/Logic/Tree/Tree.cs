@@ -7,18 +7,21 @@ namespace CustomDatabase.Logic.Tree
     public class Tree<K, V> : IIndex<K, V>
     {
         #region Variables
-        private readonly ITreeNodeManager<K, V> nodeManager;
-        private readonly bool allowDuplicateKeys;
+        private const int BitwiseComplement = ~0;
+        private readonly ITreeNodeManager<K, V> _nodeManager;
+        private readonly bool _allowDuplicateKeys;
         #endregion Variables
 
         #region Constructor
         public Tree(ITreeNodeManager<K, V> nodeManager, bool allowDuplicateKeys)
         {
             if (nodeManager == null)
-            { throw new ArgumentNullException("nodeManager"); }
+            {
+                throw new ArgumentNullException("nodeManager");
+            }
 
-            this.nodeManager = nodeManager;
-            this.allowDuplicateKeys = allowDuplicateKeys;
+            this._nodeManager = nodeManager;
+            this._allowDuplicateKeys = allowDuplicateKeys;
         }
         #endregion Constructor
 
@@ -28,8 +31,12 @@ namespace CustomDatabase.Logic.Tree
         /// </summary>
         public bool Delete(K key, V value, IComparer<V> valueComparer = null)
         {
-            if (!allowDuplicateKeys)
-            { throw new InvalidOperationException("This method should be called only from non unique tree."); }
+            if (!_allowDuplicateKeys)
+            {
+                throw new InvalidOperationException(
+                    CommonResources.GetErrorMessage("NonUniqueTreeInvocation")
+                );
+            }
 
             valueComparer = (valueComparer == null) ? Comparer<V>.Default : valueComparer;
 
@@ -55,14 +62,14 @@ namespace CustomDatabase.Logic.Tree
                             var entry = enumerator.Current;
 
                             // Stop enumerating upon reaching key larger than we look for.
-                            if (nodeManager.KeyComparer.Compare(entry.Item1, key) > 0)
+                            if (_nodeManager.KeyComparer.Compare(x: entry.Item1, y: key) > 0)
                             {
                                 shouldContinue = false;
                                 break;
                             }
 
                             // Delete entry if matches what we look for.
-                            if (valueComparer.Compare(entry.Item2, value) == 0)
+                            if (valueComparer.Compare(x: entry.Item2, y: value) == 0)
                             {
                                 enumerator.CurrentNode.Remove(enumerator.CurrentEntry);
                                 isDeleted = true;
@@ -75,7 +82,7 @@ namespace CustomDatabase.Logic.Tree
             catch (EndEnumeratingException)
             { }
 
-            nodeManager.SaveChanges();
+            _nodeManager.SaveChanges();
             return isDeleted;
         }
 
@@ -84,15 +91,21 @@ namespace CustomDatabase.Logic.Tree
         /// </summary>
         public bool Delete(K key)
         {
-            if (allowDuplicateKeys)
-            { throw new InvalidOperationException("This method should be called only from unique tree."); }
+            if (_allowDuplicateKeys)
+            {
+                throw new InvalidOperationException(
+                    CommonResources.GetErrorMessage("UniqueTreeInvocation")
+                );
+            }
 
             using (var enumerator = (TreeEnumerator<K, V>)LargerThanOrEqualTo(key).GetEnumerator())
             {
-                if (enumerator.MoveNext() && nodeManager.KeyComparer.Compare(enumerator.Current.Item1, key) == 0)
+                if (enumerator.MoveNext() &&
+                    _nodeManager.KeyComparer.Compare(x: enumerator.Current.Item1, y: key) == 0
+                    )
                 {
                     enumerator.CurrentNode.Remove(enumerator.CurrentEntry);
-                    nodeManager.SaveChanges();
+                    _nodeManager.SaveChanges();
                     return true;
                 }
             }
@@ -106,21 +119,27 @@ namespace CustomDatabase.Logic.Tree
         public void Insert(K key, V value)
         {
             int insertionIndex = 0;
-            var leafNode = FindNodeForInsertion(key, ref insertionIndex);
+            var leafNode = FindNodeForInsertion(key: key, insertionIndex: ref insertionIndex);
 
-            if (insertionIndex >= 0 && !allowDuplicateKeys)
-            { throw new TreeKeyExistsException(key); }
+            if (insertionIndex >= 0 && !_allowDuplicateKeys)
+            {
+                throw new TreeKeyExistsException(key);
+            }
 
-            leafNode.InsertAsLeaf(key, value, (insertionIndex >= 0) ? insertionIndex : ~insertionIndex);
+            leafNode.InsertAsLeaf(
+                key: key,
+                value: value,
+                insertPosition: (insertionIndex >= 0) ? insertionIndex : ~insertionIndex
+            );
 
             // Split the leaf in case of overflow
             if (leafNode.IsOverflow)
             {
                 TreeNode<K, V> left, right;
-                leafNode.Split(out left, out right);
+                leafNode.Split(outLeftNode: out left, outRightNode: out right);
             }
 
-            nodeManager.SaveChanges();
+            _nodeManager.SaveChanges();
         }
 
         /// <summary>
@@ -131,10 +150,12 @@ namespace CustomDatabase.Logic.Tree
         public Tuple<K, V> Get(K key)
         {
             int insertionIndex = 0;
-            var node = FindNodeForInsertion(key, ref insertionIndex);
+            var node = FindNodeForInsertion(key: key, insertionIndex: ref insertionIndex);
 
             if (insertionIndex < 0)
-            { return null; }
+            {
+                return null;
+            }
 
             return node.GetEntry(insertionIndex);
         }
@@ -144,7 +165,7 @@ namespace CustomDatabase.Logic.Tree
         /// </summary>
         public IEnumerable<Tuple<K, V>> GetAll()
         {
-            return nodeManager.RootNode.Entries;
+            return _nodeManager.RootNode.Entries;
         }
 
         /// <summary>
@@ -155,12 +176,19 @@ namespace CustomDatabase.Logic.Tree
         public IEnumerable<Tuple<K, V>> LargerThanOrEqualTo(K key)
         {
             int startIterationIndex = 0;
-            var node = FindNodeForIteration(key, this.nodeManager.RootNode, true, ref startIterationIndex);
+            var node = FindNodeForIteration(
+                key: key,
+                node: this._nodeManager.RootNode,
+                moveLeft: true,
+                startIterationIndex: ref startIterationIndex
+            );
 
-            return new TreeTraverser<K, V>(nodeManager,
-                node,
-                ((startIterationIndex >= 0) ? startIterationIndex : ~startIterationIndex) - 1,
-                TreeTraverseDirection.Ascending);
+            return new TreeTraverser<K, V>(
+                nodeManager: _nodeManager,
+                fromNode: node,
+                fromIndex: ((startIterationIndex >= 0) ? startIterationIndex : ~startIterationIndex) - 1,
+                direction: TreeTraverseDirection.Ascending
+            );
         }
 
         /// <summary>
@@ -171,12 +199,19 @@ namespace CustomDatabase.Logic.Tree
         public IEnumerable<Tuple<K, V>> LargerThan(K key)
         {
             int startIterationIndex = 0;
-            var node = FindNodeForIteration(key, this.nodeManager.RootNode, false, ref startIterationIndex);
+            var node = FindNodeForIteration(
+                key: key,
+                node: this._nodeManager.RootNode,
+                moveLeft: false,
+                startIterationIndex: ref startIterationIndex
+            );
 
-            return new TreeTraverser<K, V>(nodeManager,
-                node,
-                (startIterationIndex >= 0) ? startIterationIndex : (~startIterationIndex - 1),
-                TreeTraverseDirection.Ascending);
+            return new TreeTraverser<K, V>(
+                nodeManager: _nodeManager,
+                fromNode: node,
+                fromIndex: (startIterationIndex >= 0) ? startIterationIndex : (~startIterationIndex - 1),
+                direction: TreeTraverseDirection.Ascending
+            );
         }
 
         /// <summary>
@@ -187,12 +222,19 @@ namespace CustomDatabase.Logic.Tree
         public IEnumerable<Tuple<K, V>> LessThanOrEqualTo(K key)
         {
             int startIterationIndex = 0;
-            var node = FindNodeForIteration(key, this.nodeManager.RootNode, false, ref startIterationIndex);
+            var node = FindNodeForIteration(
+                key: key,
+                node: this._nodeManager.RootNode,
+                moveLeft: false,
+                startIterationIndex: ref startIterationIndex
+            );
 
-            return new TreeTraverser<K, V>(nodeManager,
-                node,
-                (startIterationIndex >= 0) ? (startIterationIndex + 1) : ~startIterationIndex,
-                TreeTraverseDirection.Descending);
+            return new TreeTraverser<K, V>(
+                nodeManager: _nodeManager,
+                fromNode: node,
+                fromIndex: (startIterationIndex >= 0) ? (startIterationIndex + 1) : ~startIterationIndex,
+                direction: TreeTraverseDirection.Descending
+            );
         }
 
         /// <summary>
@@ -203,12 +245,19 @@ namespace CustomDatabase.Logic.Tree
         public IEnumerable<Tuple<K, V>> LessThan(K key)
         {
             int startIterationIndex = 0;
-            var node = FindNodeForIteration(key, this.nodeManager.RootNode, true, ref startIterationIndex);
+            var node = FindNodeForIteration(
+                key: key,
+                node: this._nodeManager.RootNode,
+                moveLeft: true,
+                startIterationIndex: ref startIterationIndex
+            );
 
-            return new TreeTraverser<K, V>(nodeManager,
-                node,
-                (startIterationIndex >= 0) ? startIterationIndex : ~startIterationIndex,
-                TreeTraverseDirection.Descending);
+            return new TreeTraverser<K, V>(
+                nodeManager: _nodeManager,
+                fromNode: node,
+                fromIndex: (startIterationIndex >= 0) ? startIterationIndex : ~startIterationIndex,
+                direction: TreeTraverseDirection.Descending
+            );
         }
         #endregion Methods (public)
 
@@ -221,18 +270,26 @@ namespace CustomDatabase.Logic.Tree
         /// <param name="moveLeft"></param>
         /// <param name="startIterationIndex"></param>
         /// <returns></returns>
-        TreeNode<K, V> FindNodeForIteration(K key, TreeNode<K, V> node, bool moveLeft, ref int startIterationIndex)
+        private TreeNode<K, V> FindNodeForIteration(
+            K key,
+            TreeNode<K, V> node,
+            bool moveLeft,
+            ref int startIterationIndex
+        )
         {
             // Return if node is empty (non-full root node).
             // Return value is bitwise complement of 0, not 0 itself to prevent
             // caller from thinking we found a key index.
             if (node.IsEmpty)
             {
-                startIterationIndex = ~0;
+                startIterationIndex = BitwiseComplement;
                 return node;
             }
 
-            int binarySearchResult = node.BinarySearchEntriesForKey(key, moveLeft ? true : false);
+            int binarySearchResult = node.BinarySearchEntriesForKey(
+                key: key,
+                firstOccurence: moveLeft ? true : false
+            );
 
             if (binarySearchResult >= 0)
             {
@@ -243,15 +300,22 @@ namespace CustomDatabase.Logic.Tree
                 }
                 else
                 {
-                    return FindNodeForIteration(key,
-                        node.GetChildNode(moveLeft ? binarySearchResult : binarySearchResult + 1),
-                        moveLeft,
-                        ref startIterationIndex);
+                    return FindNodeForIteration(
+                        key: key,
+                        node: node.GetChildNode(moveLeft ? binarySearchResult : binarySearchResult + 1),
+                        moveLeft: moveLeft,
+                        startIterationIndex: ref startIterationIndex
+                    );
                 }
             }
             else if (!node.IsLeaf)
             {
-                return FindNodeForIteration(key, node.GetChildNode(~binarySearchResult), moveLeft, ref startIterationIndex);
+                return FindNodeForIteration(
+                    key: key,
+                    node: node.GetChildNode(~binarySearchResult),
+                    moveLeft: moveLeft,
+                    startIterationIndex: ref startIterationIndex
+                );
             }
             else
             {
@@ -266,14 +330,14 @@ namespace CustomDatabase.Logic.Tree
         /// <param name="key"></param>
         /// <param name="node"></param>
         /// <param name="insertionIndex"></param>
-        TreeNode<K, V> FindNodeForInsertion(K key, TreeNode<K, V> node, ref int insertionIndex)
+        private TreeNode<K, V> FindNodeForInsertion(K key, TreeNode<K, V> node, ref int insertionIndex)
         {
             // Return if node is empty (non-full root node).
             // Return value is bitwise complement of 0, not 0 itself to prevent
             // caller from thinking we found a key index.
             if (node.IsEmpty)
             {
-                insertionIndex = ~0;
+                insertionIndex = BitwiseComplement;
                 return node;
             }
 
@@ -281,8 +345,14 @@ namespace CustomDatabase.Logic.Tree
 
             if (binarySearchResult >= 0)
             {
-                if (allowDuplicateKeys && !node.IsLeaf)
-                { return FindNodeForInsertion(key, node.GetChildNode(binarySearchResult), ref insertionIndex); }
+                if (_allowDuplicateKeys && !node.IsLeaf)
+                {
+                    return FindNodeForInsertion(
+                        key: key,
+                        node: node.GetChildNode(binarySearchResult),
+                        insertionIndex: ref insertionIndex
+                    );
+                }
                 else
                 {
                     insertionIndex = binarySearchResult;
@@ -290,7 +360,13 @@ namespace CustomDatabase.Logic.Tree
                 }
             }
             else if (!node.IsLeaf)
-            { return FindNodeForInsertion(key, node.GetChildNode(~binarySearchResult), ref insertionIndex); }
+            {
+                return FindNodeForInsertion(
+                    key: key,
+                    node: node.GetChildNode(~binarySearchResult),
+                    insertionIndex: ref insertionIndex
+                );
+            }
             else
             {
                 insertionIndex = binarySearchResult;
@@ -305,7 +381,11 @@ namespace CustomDatabase.Logic.Tree
         /// <param name="insertionIndex"></param>
         TreeNode<K, V> FindNodeForInsertion(K key, ref int insertionIndex)
         {
-            return FindNodeForInsertion(key, nodeManager.RootNode, ref insertionIndex);
+            return FindNodeForInsertion(
+                key: key,
+                node: _nodeManager.RootNode,
+                insertionIndex: ref insertionIndex
+            );
         }
         #endregion Methods (private)
     }

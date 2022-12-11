@@ -127,47 +127,77 @@ namespace TestApp.Logic
             int offset = 0;
 
             // ID
-            personModel.Id = BufferHelper.ReadBufferGuid(data, offset);
+            personModel.Id = BufferHelper.ReadBufferGuid(buffer: data, bufferOffset: offset);
             offset = 16;
 
             // First name
-            int firstNameLength = BufferHelper.ReadBufferInt32(data, offset);
+            int firstNameLength = BufferHelper.ReadBufferInt32(buffer: data, bufferOffset: offset);
             offset += 4;
 
             if (firstNameLength < 0 || firstNameLength > (16 * 1024))
-            { throw new Exception("Invalid string length: " + firstNameLength); }
+            {
+                throw new Exception(
+                    CustomDatabase.CommonResources.GetErrorMessage("InvalidStringLength") + firstNameLength
+                );
+            }
 
-            personModel.FirstName = System.Text.Encoding.UTF8.GetString(data, offset, firstNameLength);
+            personModel.FirstName = System.Text.Encoding.UTF8.GetString(
+                bytes: data,
+                index: offset,
+                count: firstNameLength
+            );
             offset += firstNameLength;
 
             // Last name
-            int lastNameLength = BufferHelper.ReadBufferInt32(data, offset);
+            int lastNameLength = BufferHelper.ReadBufferInt32(buffer: data, bufferOffset: offset);
             offset += 4;
 
             if (lastNameLength < 0 || lastNameLength > (16 * 1024))
-            { throw new Exception("Invalid string length: " + lastNameLength); }
+            {
+                throw new Exception(
+                    CustomDatabase.CommonResources.GetErrorMessage("InvalidStringLength") + lastNameLength
+                );
+            }
 
-            personModel.LastName = System.Text.Encoding.UTF8.GetString(data, offset, lastNameLength);
+            personModel.LastName = System.Text.Encoding.UTF8.GetString(
+                bytes: data,
+                index: offset,
+                count: lastNameLength);
             offset += lastNameLength;
 
             // Email
-            int emailLength = BufferHelper.ReadBufferInt32(data, offset);
+            int emailLength = BufferHelper.ReadBufferInt32(buffer: data, bufferOffset: offset);
             offset += 4;
 
             if (emailLength < 0 || emailLength > (16 * 1024))
-            { throw new Exception("Invalid string length: " + emailLength); }
+            {
+                throw new Exception(
+                    CustomDatabase.CommonResources.GetErrorMessage("InvalidStringLength") + emailLength
+                );
+            }
 
-            personModel.Email = System.Text.Encoding.UTF8.GetString(data, offset, emailLength);
+            personModel.Email = System.Text.Encoding.UTF8.GetString(
+                bytes: data,
+                index: offset,
+                count: emailLength
+            );
             offset += emailLength;
 
             // Phone number
-            int phoneNumberLength = BufferHelper.ReadBufferInt32(data, offset);
+            int phoneNumberLength = BufferHelper.ReadBufferInt32(buffer: data, bufferOffset: offset);
             offset += 4;
 
             if (phoneNumberLength < 0 || phoneNumberLength > (16 * 1024))
-            { throw new Exception("Invalid string length: " + phoneNumberLength); }
+            {
+                throw new Exception(
+                    CustomDatabase.CommonResources.GetErrorMessage("InvalidStringLength") + phoneNumberLength
+                );
+            }
 
-            personModel.PhoneNumber = System.Text.Encoding.UTF8.GetString(data, offset, phoneNumberLength);
+            personModel.PhoneNumber = System.Text.Encoding.UTF8.GetString(
+                bytes: data,
+                index: offset,
+                count: phoneNumberLength);
 
             return personModel;
         }

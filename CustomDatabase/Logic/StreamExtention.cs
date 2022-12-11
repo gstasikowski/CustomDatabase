@@ -10,7 +10,7 @@ namespace CustomDatabase.Logic
         /// </summary>
         public static StreamReadWrapper ExpectStream(this Stream target, long length)
         {
-            return new StreamReadWrapper(target, length);
+            return new StreamReadWrapper(target: target, readLimit: length);
         }
 
         /// <summary>
@@ -18,7 +18,7 @@ namespace CustomDatabase.Logic
         /// </summary>
         public static void Write(this Stream stream, byte[] buffer)
         {
-            stream.Write(buffer, 0, buffer.Length);
+            stream.Write(buffer: buffer, offset: 0, count: buffer.Length);
         }
 
         /// <summary>
@@ -31,11 +31,13 @@ namespace CustomDatabase.Logic
 
             while (filled < buffer.Length)
             {
-                lastRead = src.Read(buffer, filled, buffer.Length - filled);
+                lastRead = src.Read(buffer: buffer, offset: filled, count: buffer.Length - filled);
                 filled += lastRead;
 
                 if (lastRead == 0)
-                { break; }
+                {
+                    break;
+                }
             }
 
             return filled;
@@ -51,11 +53,17 @@ namespace CustomDatabase.Logic
 
             while (filled < buffer.Length)
             {
-                lastRead = await source.ReadAsync(buffer, filled, buffer.Length - filled);
+                lastRead = await source.ReadAsync(
+                    buffer: buffer,
+                    offset: filled,
+                    count: buffer.Length - filled
+                );
                 filled += lastRead;
 
                 if (lastRead == 0)
-                { break; }
+                {
+                    break;
+                }
             }
 
             return filled;
@@ -76,20 +84,24 @@ namespace CustomDatabase.Logic
 
             while (totalRead < maxLength)
             {
-                int bytesToRead = (int)Math.Min(maxLength - totalRead, buffer.Length);
-                int thisRead = source.Read(buffer, 0, bytesToRead);
+                int bytesToRead = (int)Math.Min(val1: maxLength - totalRead, val2: buffer.Length);
+                int thisRead = source.Read(buffer: buffer, offset: 0, count: bytesToRead);
 
                 if (thisRead == 0)
-                { throw new EndOfStreamException(); }
+                {
+                    throw new EndOfStreamException();
+                }
 
                 totalRead += thisRead;
 
-                destination.Write(buffer, 0, thisRead);
+                destination.Write(buffer: buffer, offset: 0, count: thisRead);
                 destination.Flush();
 
                 // Call feedback, if "false" then stop copying
                 if (feedback != null && feedback(totalRead) == false)
-                { return; }
+                {
+                    return;
+                }
             }
         }
 
@@ -107,20 +119,24 @@ namespace CustomDatabase.Logic
 
             while (totalRead < maxLength)
             {
-                int bytesToRead = (int)Math.Min(maxLength - totalRead, buffer.Length);
-                int thisRead = await source.ReadAsync(buffer, 0, bytesToRead);
+                int bytesToRead = (int)Math.Min(val1: maxLength - totalRead, val2: buffer.Length);
+                int thisRead = await source.ReadAsync(buffer: buffer, offset: 0, count: bytesToRead);
 
                 if (thisRead == 0)
-                { throw new EndOfStreamException(); }
+                {
+                    throw new EndOfStreamException();
+                }
 
                 totalRead += thisRead;
 
-                destination.Write(buffer, 0, thisRead);
+                destination.Write(buffer: buffer, offset: 0, count: thisRead);
                 destination.Flush();
 
                 // Call feedback, if "false" then stop copying
                 if (feedback != null && feedback(totalRead) == false)
-                { return; }
+                {
+                    return;
+                }
             }
         }
         #endregion Methods (public)
@@ -134,9 +150,13 @@ namespace CustomDatabase.Logic
             var buff = new byte[4];
 
             if (target.Read(buff) == 4)
-            { return LittleEndianByteOrder.GetSingle(buff); }
+            {
+                return LittleEndianByteOrder.GetSingle(buff);
+            }
             else
-            { throw new EndOfStreamException(); }
+            {
+                throw new EndOfStreamException();
+            }
         }
 
         /// <summary>
@@ -147,9 +167,13 @@ namespace CustomDatabase.Logic
             var buff = new byte[4];
 
             if (target.Read(buff) == 4)
-            { return LittleEndianByteOrder.GetInt32(buff); }
+            {
+                return LittleEndianByteOrder.GetInt32(buff);
+            }
             else
-            { throw new EndOfStreamException(); }
+            {
+                throw new EndOfStreamException();
+            }
         }
 
         /// <summary>
@@ -160,9 +184,13 @@ namespace CustomDatabase.Logic
             var buff = new byte[4];
 
             if (target.Read(buff) == 4)
-            { return LittleEndianByteOrder.GetUInt32(buff); }
+            {
+                return LittleEndianByteOrder.GetUInt32(buff);
+            }
             else
-            { throw new EndOfStreamException(); }
+            {
+                throw new EndOfStreamException();
+            }
         }
 
         /// <summary>
@@ -173,9 +201,13 @@ namespace CustomDatabase.Logic
             var buff = new byte[8];
 
             if (target.Read(buff) == 8)
-            { return LittleEndianByteOrder.GetInt64(buff); }
+            {
+                return LittleEndianByteOrder.GetInt64(buff);
+            }
             else
-            { throw new EndOfStreamException(); }
+            {
+                throw new EndOfStreamException();
+            }
         }
 
         /// <summary>
@@ -186,9 +218,13 @@ namespace CustomDatabase.Logic
             var buff = new byte[8];
 
             if (target.Read(buff) == 8)
-            { return LittleEndianByteOrder.GetDouble(buff); }
+            {
+                return LittleEndianByteOrder.GetDouble(buff);
+            }
             else
-            { throw new EndOfStreamException(); }
+            {
+                throw new EndOfStreamException();
+            }
         }
 
         /// <summary>
@@ -207,9 +243,13 @@ namespace CustomDatabase.Logic
             var buff = new byte[16];
 
             if (target.Read(buff) == 16)
-            { return new Guid(buff); }
+            {
+                return new Guid(buff);
+            }
             else
-            { throw new EndOfStreamException(); }
+            {
+                throw new EndOfStreamException();
+            }
         }
         #endregion Methods (Expect_)
     }

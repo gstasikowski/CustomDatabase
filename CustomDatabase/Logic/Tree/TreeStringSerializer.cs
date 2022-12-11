@@ -19,7 +19,7 @@ namespace CustomDatabase.Logic.Tree
         #region Methods (public)
         public string Deserialize(byte[] buffer, int offset, int length)
         {
-            return System.Text.Encoding.UTF8.GetString(buffer, offset, length);
+            return System.Text.Encoding.UTF8.GetString(bytes: buffer, index: offset, count: length);
         }
 
         public byte[] Serialize(string value)

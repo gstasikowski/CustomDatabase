@@ -6,22 +6,24 @@ namespace CustomDatabase.Logic.Tree
     public sealed class TreeDiskNodeManager<K, V> : ITreeNodeManager<K, V>
     {
         #region Variables
-        private readonly IRecordStorage recordStorage;
-        private readonly Dictionary<uint, TreeNode<K, V>> dirtyNodes = new Dictionary<uint, TreeNode<K, V>>();
-        private readonly Dictionary<uint, WeakReference<TreeNode<K, V>>> nodeWeakRefs = new Dictionary<uint, WeakReference<TreeNode<K, V>>>();
-        private readonly System.Collections.Queue nodeStrongRefs = new System.Collections.Queue();
-        private readonly int maxStrongNodeRefs = 200;
-        private readonly TreeDiskNodeSerializer<K, V> serializer;
-        private readonly ushort minEntriesPerNode = 36;
+        private readonly IRecordStorage _recordStorage;
+        private readonly Dictionary<uint, TreeNode<K, V>> _dirtyNodes = 
+            new Dictionary<uint, TreeNode<K, V>>();
+        private readonly Dictionary<uint, WeakReference<TreeNode<K, V>>> _nodeWeakRefs = 
+            new Dictionary<uint, WeakReference<TreeNode<K, V>>>();
+        private readonly System.Collections.Queue _nodeStrongRefs = new System.Collections.Queue();
+        private readonly int _maxStrongNodeRefs = 200;
+        private readonly TreeDiskNodeSerializer<K, V> _serializer;
+        private readonly ushort _minEntriesPerNode = 36;
                 
-        private TreeNode<K, V> rootNode;
-        private int cleanupCounter = 0;
+        private TreeNode<K, V> _rootNode;
+        private int _cleanupCounter = 0;
         #endregion Variables
 
         #region Properties
         public ushort MinEntriesPerNode
         {
-            get { return minEntriesPerNode; }
+            get { return _minEntriesPerNode; }
         }
 
         public IComparer<Tuple<K, V>> EntryComparer
@@ -38,7 +40,7 @@ namespace CustomDatabase.Logic.Tree
 
         public TreeNode<K, V> RootNode
         {
-            get { return rootNode; }
+            get { return _rootNode; }
         }
         #endregion Properties
 
@@ -46,10 +48,12 @@ namespace CustomDatabase.Logic.Tree
         /// <summary>
         /// Construct a tree from given storage using default comparer for keys.
         /// </summary>
-        public TreeDiskNodeManager(ISerializer<K> keySerializer,
+        public TreeDiskNodeManager(
+            ISerializer<K> keySerializer,
             ISerializer<V> valueSerializer,
             IRecordStorage nodeStorage)
-            : this (keySerializer, valueSerializer, nodeStorage, Comparer<K>.Default)
+            : this (keySerializer, valueSerializer, nodeStorage, Comparer<K>.Default
+        )
         { }
 
         /// <summary>
@@ -59,28 +63,40 @@ namespace CustomDatabase.Logic.Tree
         /// <param name="valueSerializer">Tool to serialize node values.</param>
         /// <param name="recordStorage">Underlying tool for node storage.</param>
         /// <param name="keyComparer">Key comparer.</param>
-        public TreeDiskNodeManager(ISerializer<K> keySerializer,
+        public TreeDiskNodeManager(
+            ISerializer<K> keySerializer,
             ISerializer<V> valueSerializer,
             IRecordStorage recordStorage,
-            IComparer<K> keyComparer)
+            IComparer<K> keyComparer
+        )
         {
             if (recordStorage == null)
-            { throw new ArgumentNullException("nodeStorage"); }
+            {
+                throw new ArgumentNullException("nodeStorage");
+            }
 
-            this.serializer = new TreeDiskNodeSerializer<K, V>(this, keySerializer, valueSerializer);
-            this.recordStorage = recordStorage;
+            this._serializer = new TreeDiskNodeSerializer<K, V>(
+                nodeManager: this,
+                keySerializer: keySerializer,
+                valueSerializer: valueSerializer
+            );
+            this._recordStorage = recordStorage;
             this.KeyComparer = keyComparer;
             this.EntryComparer = Comparer<Tuple<K, V>>.Create((a, b) =>
-            { return KeyComparer.Compare(a.Item1, b.Item1); });
+                { return KeyComparer.Compare(x: a.Item1, y: b.Item1); });
 
             // The first record of nodeStorage contains ID of root node.
             // If this record doesn't currently exist, attempt to create it.
             var firstBlockData = recordStorage.Find(1u);
 
             if (firstBlockData != null)
-            { this.rootNode = Find(BufferHelper.ReadBufferUInt32(firstBlockData, 0)); }
+            {
+                this._rootNode = Find(BufferHelper.ReadBufferUInt32(buffer: firstBlockData, bufferOffset: 0));
+            }
             else
-            { this.rootNode = CreateFirstRoot(); }
+            {
+                this._rootNode = CreateFirstRoot();
+            }
         }
         #endregion Constructors
 
@@ -89,16 +105,24 @@ namespace CustomDatabase.Logic.Tree
         {
             TreeNode<K, V> node = null;
 
-            recordStorage.Create(nodeId =>
+            _recordStorage.Create(nodeId =>
             {
-                node = new TreeNode<K, V>(this, nodeId, 0, entries, childrenIds);
+                node = new TreeNode<K, V>(
+                    nodeManager: this,
+                    id: nodeId,
+                    parentId: 0,
+                    entries: entries,
+                    childrenIds: childrenIds
+                    );
                 OnNodeInitialized(node);
 
-                return this.serializer.Serialize(node);
+                return this._serializer.Serialize(node);
             });
 
             if (node == null)
-            { throw new Exception("dataGenerator never called by nodeStorage."); }
+            {
+                throw new Exception(CommonResources.GetErrorMessage("FailedToCallDataGenerator"));
+            }
 
             return node;
         }
@@ -106,26 +130,30 @@ namespace CustomDatabase.Logic.Tree
         public TreeNode<K, V> Find(uint id)
         {
             // Check if the node is being held in memory, return it if true.
-            if (nodeWeakRefs.ContainsKey(id))
+            if (_nodeWeakRefs.ContainsKey(id))
             {
                 TreeNode<K, V> node;
 
-                if (nodeWeakRefs[id].TryGetTarget(out node))
-                { return node; }
+                if (_nodeWeakRefs[id].TryGetTarget(out node))
+                {
+                    return node;
+                }
                 else
                 { 
                     // Node deallocated, remove weak reference.
-                    nodeWeakRefs.Remove(id);
+                    _nodeWeakRefs.Remove(id);
                 }
             }
 
             // If node note in memory, get it.
-            byte[] data = recordStorage.Find(id);
+            byte[] data = _recordStorage.Find(id);
 
             if (data == null)
-            { return null; }
+            {
+                return null;
+            }
 
-            var deserializedNode = this.serializer.Deserialize(id, data);
+            var deserializedNode = this._serializer.Deserialize(assignId: id, record: data);
 
             OnNodeInitialized(deserializedNode);
             
@@ -134,88 +162,103 @@ namespace CustomDatabase.Logic.Tree
 
         public TreeNode<K, V> CreateNewRoot(K key, V value, uint leftNodeId, uint rightNodeId)
         {
-            var node = Create(new Tuple<K, V>[] { new Tuple<K, V>(key, value) }, new uint[] { leftNodeId, rightNodeId });
+            var node = Create(
+                entries: new Tuple<K, V>[] { new Tuple<K, V>(item1: key, item2: value) }, 
+                childrenIds: new uint[] { leftNodeId, rightNodeId }
+                );
 
-            this.rootNode = node;
-            recordStorage.Update(1u, LittleEndianByteOrder.GetBytes(node.Id));
+            this._rootNode = node;
+            _recordStorage.Update(recordId: 1u, data: LittleEndianByteOrder.GetBytes(node.Id));
 
-            return this.rootNode;
+            return this._rootNode;
         }
 
         public void MakeRoot(TreeNode<K, V> node)
         {
-            this.rootNode = node;
-            recordStorage.Update(1u, LittleEndianByteOrder.GetBytes(node.Id));
+            this._rootNode = node;
+            _recordStorage.Update(recordId: 1u, data: LittleEndianByteOrder.GetBytes(node.Id));
         }
 
         public void Delete(TreeNode<K, V> node)
         {
-            if (node == rootNode)
-            { rootNode = null; }
+            if (node == _rootNode)
+            {
+                _rootNode = null;
+            }
 
-            recordStorage.Delete(node.Id);
+            _recordStorage.Delete(node.Id);
 
-            if (dirtyNodes.ContainsKey(node.Id))
-            { dirtyNodes.Remove(node.Id); }
+            if (_dirtyNodes.ContainsKey(node.Id))
+            {
+                _dirtyNodes.Remove(node.Id);
+            }
         }
 
         public void MarkAsChanged(TreeNode<K, V> node)
         {
-            if (!dirtyNodes.ContainsKey(node.Id))
-            { dirtyNodes.Add(node.Id, node); }
+            if (!_dirtyNodes.ContainsKey(node.Id))
+            {
+                _dirtyNodes.Add(key: node.Id, value: node);
+            }
         }
 
         public void SaveChanges()
         {
-            foreach (var kv in dirtyNodes)
-            { recordStorage.Update(kv.Value.Id, this.serializer.Serialize(kv.Value)); }
+            foreach (var kv in _dirtyNodes)
+            {
+                _recordStorage.Update(recordId: kv.Value.Id, data: this._serializer.Serialize(kv.Value));
+            }
 
-            dirtyNodes.Clear();
+            _dirtyNodes.Clear();
         }
         #endregion Methods (public)
 
         #region Methods (private)
-        TreeNode<K, V> CreateFirstRoot()
+        private TreeNode<K, V> CreateFirstRoot()
         {
             // Write down the ID of first node into the first block.
-            recordStorage.Create(LittleEndianByteOrder.GetBytes((uint)2));
+            _recordStorage.Create(LittleEndianByteOrder.GetBytes((uint)2));
 
             // Newely created node should have ID = 2.
-            return Create(null, null);
+            return Create(entries: null, childrenIds: null);
         }
 
-        void OnNodeInitialized(TreeNode<K, V> node)
+        private void OnNodeInitialized(TreeNode<K, V> node)
         {
             // Keep a weak reference to the provided node.
-            nodeWeakRefs.Add(node.Id, new WeakReference<TreeNode<K, V>>(node));
+            _nodeWeakRefs.Add(key: node.Id, value: new WeakReference<TreeNode<K, V>>(node));
 
             // Keep a stron reference to prevent the weak one from being deallocated.
-            nodeStrongRefs.Enqueue(node);
+            _nodeStrongRefs.Enqueue(node);
 
             // Clean up strong refs if there are too many of them.
-            if (nodeStrongRefs.Count >= maxStrongNodeRefs)
+            if (_nodeStrongRefs.Count >= _maxStrongNodeRefs)
             {
-                while (nodeStrongRefs.Count >= (maxStrongNodeRefs/2f))
-                { nodeStrongRefs.Dequeue(); }
+                while (_nodeStrongRefs.Count >= (_maxStrongNodeRefs / 2f))
+                {
+                    _nodeStrongRefs.Dequeue();
+                }
             }
 
             // Clean up weak refs
-            if (this.cleanupCounter++ >= 1000)
+            if (this._cleanupCounter++ >= 1000)
             {
-                this.cleanupCounter = 0;
+                this._cleanupCounter = 0;
                 var toBeDeleted = new List<uint>();
 
-                foreach (var kv in this.nodeWeakRefs)
+                foreach (var kv in this._nodeWeakRefs)
                 {
                     TreeNode<K, V> target;
 
                     if (!kv.Value.TryGetTarget(out target))
-                    { toBeDeleted.Add(kv.Key); }
+                    {
+                        toBeDeleted.Add(kv.Key);
+                    }
                 }
 
                 foreach (var key in toBeDeleted)
                 {
-                    this.nodeWeakRefs.Remove(key);
+                    this._nodeWeakRefs.Remove(key);
                 }
             }
         }

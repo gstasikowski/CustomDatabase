@@ -6,10 +6,8 @@ namespace CustomDatabase.Interfaces
 
         byte[] Serialize(K value);
 
-        bool IsFixedSize
-        { get; }
+        bool IsFixedSize { get; }
 
-        int Length
-        { get; }
+        int Length { get; }
     }
 }

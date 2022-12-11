@@ -7,46 +7,70 @@ namespace TestApp.Logic
     class PeopleDatabase : IDisposable
     {
         #region Variables
-        private readonly Stream mainDatabaseFile;
-        private readonly Stream primaryIndexFile;
-        private readonly Stream secondaryIndexFile;
-        private readonly Tree<Guid, uint> primaryIndex;
-        private readonly Tree<Tuple<string, string>, uint> secondaryIndex;
-        private readonly RecordStorage peopleRecords;
-        private readonly PersonSerializer personSerializer = new PersonSerializer();
+        private readonly Stream _mainDatabaseFile;
+        private readonly Stream _primaryIndexFile;
+        private readonly Stream _secondaryIndexFile;
+        private readonly Tree<Guid, uint> _primaryIndex;
+        private readonly Tree<Tuple<string, string>, uint> _secondaryIndex;
+        private readonly RecordStorage _peopleRecords;
+        private readonly PersonSerializer _personSerializer = new PersonSerializer();
         #endregion Variables
 
         #region Constructor
         public PeopleDatabase(string pathToDBFile)
         {
             if (pathToDBFile == null)
-            { throw new ArgumentNullException("pathToDBFile"); }
+            {
+                throw new ArgumentNullException("pathToDBFile");
+            }
 
             // Open the stream and (create) database files.
-            this.mainDatabaseFile = new FileStream(pathToDBFile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096);
-            this.primaryIndexFile = new FileStream(pathToDBFile + ".pidx", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096);
-            this.secondaryIndexFile = new FileStream(pathToDBFile + ".sidx", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096);
-
-            // Create a RecordStorage for main cow data
-            this.peopleRecords = new RecordStorage(new BlockStorage(this.mainDatabaseFile, 4096, 48));
-
-            // Create the indexes
-            this.primaryIndex = new Tree<Guid, uint>(
-                new TreeDiskNodeManager<Guid, uint>(
-                    new GuidSerializer(),
-                    new TreeUIntSerializer(),
-                    new RecordStorage(new BlockStorage(this.primaryIndexFile, 4096))
-                    ),
-                false
+            this._mainDatabaseFile = new FileStream(
+                path: pathToDBFile,
+                mode: FileMode.OpenOrCreate,
+                access: FileAccess.ReadWrite,
+                share: FileShare.None,
+                bufferSize: 4096
+            );
+            this._primaryIndexFile = new FileStream(
+                path: pathToDBFile + ".pidx",
+                mode: FileMode.OpenOrCreate,
+                access: FileAccess.ReadWrite,
+                share: FileShare.None,
+                bufferSize: 4096
+            );
+            this._secondaryIndexFile = new FileStream(
+                path: pathToDBFile + ".sidx",
+                mode: FileMode.OpenOrCreate,
+                access: FileAccess.ReadWrite,
+                share: FileShare.None,
+                bufferSize: 4096
             );
 
-            this.secondaryIndex = new Tree<Tuple<string, string>, uint>(
-				new TreeDiskNodeManager<Tuple<string, string>, uint>(
-					new StringSerializer(), 
-					new TreeUIntSerializer(), 
-					new RecordStorage(new BlockStorage(this.secondaryIndexFile, 4096))
-                    ),
-                true
+            // Create a RecordStorage for main cow data
+            this._peopleRecords = new RecordStorage(
+                new BlockStorage(storage: this._mainDatabaseFile, blockSize: 4096, blockHeaderSize: 48));
+
+            // Create the indexes
+            this._primaryIndex = new Tree<Guid, uint>(
+                nodeManager: new TreeDiskNodeManager<Guid, uint>(
+                    keySerializer: new GuidSerializer(),
+                    valueSerializer: new TreeUIntSerializer(),
+                    nodeStorage: new RecordStorage(
+                        new BlockStorage(storage: this._primaryIndexFile, blockSize: 4096)
+                    )
+                ),
+                allowDuplicateKeys: false
+            );
+
+            this._secondaryIndex = new Tree<Tuple<string, string>, uint>(
+				nodeManager: new TreeDiskNodeManager<Tuple<string, string>, uint>(
+					keySerializer: new StringSerializer(), 
+					valueSerializer: new TreeUIntSerializer(), 
+					nodeStorage: new RecordStorage(
+                        new BlockStorage(storage: this._secondaryIndexFile, blockSize: 4096))
+                ),
+                allowDuplicateKeys: true
             );
         }
         #endregion Constructor
@@ -58,7 +82,9 @@ namespace TestApp.Logic
         public void Update(PersonModel person)
         {
             if (disposed)
-            { throw new ObjectDisposedException("PeopleDatabase"); }
+            {
+                throw new ObjectDisposedException("PeopleDatabase");
+            }
 
             throw new NotImplementedException();
         }
@@ -69,12 +95,17 @@ namespace TestApp.Logic
         public void Insert(PersonModel person)
         {
             if (disposed)
-            { throw new ObjectDisposedException("PeopleDatabase"); }
+            {
+                throw new ObjectDisposedException("PeopleDatabase");
+            }
 
-            uint recordId = this.peopleRecords.Create(this.personSerializer.Serialize(person));
+            uint recordId = this._peopleRecords.Create(this._personSerializer.Serialize(person));
 
-            this.primaryIndex.Insert(person.Id, recordId);
-            this.secondaryIndex.Insert(new Tuple<string, string>(person.FirstName, person.LastName), recordId);
+            this._primaryIndex.Insert(key: person.Id, value: recordId);
+            this._secondaryIndex.Insert(
+                key: new Tuple<string, string>(item1: person.FirstName, item2: person.LastName),
+                value: recordId
+            );
         }
 
         /// <summary>
@@ -83,14 +114,18 @@ namespace TestApp.Logic
         public PersonModel Find(Guid id)
         {
             if (disposed)
-            { throw new ObjectDisposedException("PeopleDatabase"); }
+            {
+                throw new ObjectDisposedException("PeopleDatabase");
+            }
 
-            var entry = this.primaryIndex.Get(id);
+            var entry = this._primaryIndex.Get(id);
 
             if (entry == null)
-            { return null; }
+            {
+                return null;
+            }
 
-            return this.personSerializer.Deserialize(this.peopleRecords.Find(entry.Item2));
+            return this._personSerializer.Deserialize(this._peopleRecords.Find(entry.Item2));
         }
 
         /// <summary>
@@ -99,15 +134,17 @@ namespace TestApp.Logic
         public IEnumerable<PersonModel> FindBy(string firstName, string lastName)
         {
             var comparer = Comparer<Tuple<string, string>>.Default;
-            var searchKey = new Tuple<string, string>(firstName, lastName);
+            var searchKey = new Tuple<string, string>(item1: firstName, item2: lastName);
 
-            foreach (var entry in this.secondaryIndex.LargerThanOrEqualTo(searchKey))
+            foreach (var entry in this._secondaryIndex.LargerThanOrEqualTo(searchKey))
             {
                 // Stop upon reaching key larger than provided
                 if (comparer.Compare(entry.Item1, searchKey) > 0)
-                { break; }
+                {
+                    break;
+                }
 
-                yield return this.personSerializer.Deserialize(this.peopleRecords.Find(entry.Item2));
+                yield return this._personSerializer.Deserialize(this._peopleRecords.Find(entry.Item2));
             }
         }
 
@@ -116,11 +153,11 @@ namespace TestApp.Logic
         /// </summary>
         public IEnumerable<PersonModel> GetAll()
         {
-            var elements = this.primaryIndex.GetAll();
+            var elements = this._primaryIndex.GetAll();
 
             foreach (var entry in elements)
             {
-                yield return this.personSerializer.Deserialize(this.peopleRecords.Find(entry.Item2));
+                yield return this._personSerializer.Deserialize(this._peopleRecords.Find(entry.Item2));
             }
         }
 
@@ -146,9 +183,9 @@ namespace TestApp.Logic
         {
             if (disposing && !disposed)
             {
-                this.mainDatabaseFile.Dispose();
-                this.primaryIndexFile.Dispose();
-                this.secondaryIndexFile.Dispose();
+                this._mainDatabaseFile.Dispose();
+                this._primaryIndexFile.Dispose();
+                this._secondaryIndexFile.Dispose();
                 this.disposed = true;
             }
         }

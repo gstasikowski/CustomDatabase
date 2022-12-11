@@ -21,9 +21,11 @@ namespace TestApp.Logic
         public Guid Deserialize(byte[] buffer, int offset, int length)
         {
             if (length != 16)
-            { throw new ArgumentException("length"); }
+            {
+                throw new ArgumentException("length");
+            }
 
-            return BufferHelper.ReadBufferGuid(buffer, offset);
+            return BufferHelper.ReadBufferGuid(buffer: buffer, bufferOffset: offset);
         }
 
         public byte[] Serialize(Guid value)

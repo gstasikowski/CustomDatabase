@@ -11,7 +11,9 @@ namespace CustomDatabase.Helpers
 			byte[] bytes = BitConverter.GetBytes(value);
 
 			if (false == BitConverter.IsLittleEndian)
-			{ Array.Reverse(bytes); }
+			{
+				Array.Reverse(bytes);
+			}
 
 			return bytes;
 		}
@@ -21,7 +23,9 @@ namespace CustomDatabase.Helpers
 			byte[] bytes = BitConverter.GetBytes(value);
 
 			if (false == BitConverter.IsLittleEndian)
-			{ Array.Reverse(bytes); }
+			{
+				Array.Reverse(bytes);
+			}
 
 			return bytes;
 		}
@@ -31,7 +35,9 @@ namespace CustomDatabase.Helpers
 			byte[] bytes = BitConverter.GetBytes(value);
 
 			if (false == BitConverter.IsLittleEndian)
-			{ Array.Reverse(bytes); }
+			{
+				Array.Reverse(bytes);
+			}
 
 			return bytes;
 		}
@@ -41,7 +47,9 @@ namespace CustomDatabase.Helpers
 			byte[] bytes = BitConverter.GetBytes(value);
 
 			if (false == BitConverter.IsLittleEndian)
-			{ Array.Reverse(bytes); }
+			{
+				Array.Reverse(bytes);
+			}
 
 			return bytes;
 		}
@@ -51,7 +59,9 @@ namespace CustomDatabase.Helpers
 			byte[] bytes = BitConverter.GetBytes(value);
 
 			if (false == BitConverter.IsLittleEndian)
-			{ Array.Reverse(bytes); }
+			{
+				Array.Reverse(bytes);
+			}
 
 			return bytes;
 		}
@@ -63,14 +73,14 @@ namespace CustomDatabase.Helpers
 			if (false == BitConverter.IsLittleEndian)
 			{
 				byte[] bytesClone = new byte[bytes.Length];
-				bytes.CopyTo(bytesClone, 0);
+				bytes.CopyTo(array: bytesClone, index: 0);
 				Array.Reverse(bytesClone);
 				
-				return BitConverter.ToSingle(bytesClone, 0);
+				return BitConverter.ToSingle(value: bytesClone, startIndex: 0);
 			}
 			else
 			{
-				return BitConverter.ToSingle(bytes, 0);
+				return BitConverter.ToSingle(value: bytes, startIndex: 0);
 			}
 		}
 
@@ -81,14 +91,14 @@ namespace CustomDatabase.Helpers
 			if (false == BitConverter.IsLittleEndian)
 			{
 				byte[] bytesClone = new byte[bytes.Length];
-				bytes.CopyTo(bytesClone, 0);
+				bytes.CopyTo(array: bytesClone, index: 0);
 				Array.Reverse(bytesClone);
 				
-				return BitConverter.ToDouble(bytesClone, 0);
+				return BitConverter.ToDouble(value: bytesClone, startIndex: 0);
 			}
 			else
 			{
-				return BitConverter.ToDouble(bytes, 0);
+				return BitConverter.ToDouble(value: bytes, startIndex: 0);
 			}
 		}
 
@@ -99,14 +109,14 @@ namespace CustomDatabase.Helpers
 			if (false == BitConverter.IsLittleEndian)
 			{
 				var bytesClone = new byte[bytes.Length];
-				bytes.CopyTo(bytesClone, 0);
+				bytes.CopyTo(array: bytesClone, index: 0);
 				Array.Reverse(bytesClone);
 				
-				return BitConverter.ToInt64(bytesClone, 0);
+				return BitConverter.ToInt64(value: bytesClone, startIndex: 0);
 			}
 			else
 			{
-				return BitConverter.ToInt64(bytes, 0);
+				return BitConverter.ToInt64(value: bytes, startIndex: 0);
 			}
 		}
 
@@ -117,14 +127,14 @@ namespace CustomDatabase.Helpers
 			if (false == BitConverter.IsLittleEndian)
 			{
 				var bytesClone = new byte[bytes.Length];
-				bytes.CopyTo(bytesClone, 0);
+				bytes.CopyTo(array: bytesClone, index: 0);
 				Array.Reverse(bytesClone);
 				
-				return BitConverter.ToInt32(bytesClone, 0);
+				return BitConverter.ToInt32(value: bytesClone, startIndex: 0);
 			}
 			else
 			{
-				return BitConverter.ToInt32(bytes, 0);
+				return BitConverter.ToInt32(value: bytes, startIndex: 0);
 			}
 		}
 
@@ -135,21 +145,21 @@ namespace CustomDatabase.Helpers
 			if (false == BitConverter.IsLittleEndian)
 			{
 				var bytesClone = new byte[bytes.Length];
-				bytes.CopyTo(bytesClone, 0);
+				bytes.CopyTo(array: bytesClone, index: 0);
 				Array.Reverse(bytesClone);
 				
-				return BitConverter.ToUInt32(bytesClone, 0);
+				return BitConverter.ToUInt32(value: bytesClone, startIndex: 0);
 			}
 			else
 			{
-				return BitConverter.ToUInt32(bytes, 0);
+				return BitConverter.ToUInt32(value: bytes, startIndex: 0);
 			}
 		}
 
 		public static int GetInt32(byte[] bytes, int offset, int count)
 		{
 			var copied = new byte[count];
-			Buffer.BlockCopy(bytes, offset, copied, 0, count);
+			Buffer.BlockCopy(src: bytes, srcOffset: offset, dst: copied, dstOffset: 0, count: count);
 			
 			return GetInt32(copied);
 		}

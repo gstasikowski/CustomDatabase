@@ -5,33 +5,33 @@ namespace CustomDatabase.Logic
     public class BlockStorage : IBlockStorage
     {
         #region Variables
-        private readonly Stream stream;
-        private readonly int blockContentSize;
-        private readonly int blockHeaderSize;
-        private readonly int blockSize;
-        private readonly int unitOfWork;
-        private readonly Dictionary<uint, Block> blocks = new Dictionary<uint, Block>();
+        private readonly Stream _stream;
+        private readonly int _blockContentSize;
+        private readonly int _blockHeaderSize;
+        private readonly int _blockSize;
+        private readonly int _unitOfWork;
+        private readonly Dictionary<uint, Block> _blocks = new Dictionary<uint, Block>();
         #endregion Variables
 
         #region Properties
         public int BlockContentSize
         {
-            get { return blockContentSize; }
+            get { return _blockContentSize; }
         }
 
         public int BlockHeaderSize
         {
-            get { return blockHeaderSize; }
+            get { return _blockHeaderSize; }
         }
 
         public int BlockSize
         {
-            get { return blockSize; }
+            get { return _blockSize; }
         }
 
         public int DiskSectorSize
         {
-            get { return unitOfWork; }
+            get { return _unitOfWork; }
         }
         #endregion Properties
 
@@ -39,37 +39,52 @@ namespace CustomDatabase.Logic
         public BlockStorage(Stream storage, int blockSize = 40960, int blockHeaderSize = 48)
         {
             if (storage == null)
-            { throw new ArgumentNullException("storage"); }
+            {
+                throw new ArgumentNullException("storage");
+            }
 
             if (blockHeaderSize >= blockSize)
-            { throw new ArgumentException("blockHeaderSize can't be >= to blockSize"); }
+            {
+                throw new ArgumentException(CommonResources.GetErrorMessage("BlockHeaderSizeTooBig"));
+            }
 
             if (blockSize < 128)
-            { throw new ArgumentException("blockSize too small"); }
+            {
+                throw new ArgumentException("blockSize too small");
+            }
 
-            this.blockContentSize = blockSize - blockHeaderSize;
-            this.blockHeaderSize = blockHeaderSize;
-            this.blockSize = blockSize;
-            this.unitOfWork = (blockSize >= 4096) ? 4096 : 128;
-            this.stream = storage;
+            this._blockContentSize = blockSize - blockHeaderSize;
+            this._blockHeaderSize = blockHeaderSize;
+            this._blockSize = blockSize;
+            this._unitOfWork = (blockSize >= 4096) ? 4096 : 128;
+            this._stream = storage;
         }
         #endregion Constructors
 
         #region Methods (public)
         public IBlock CreateNew()
         {
-            if ((stream.Length % blockSize) != 0)
-            { throw new DataMisalignedException("Unexpected length of the stream: " + stream.Length); }
+            if ((_stream.Length % _blockSize) != 0)
+            {
+                throw new DataMisalignedException(
+                    CommonResources.GetErrorMessage("UnexpectedStreamLength") + _stream.Length
+                );
+            }
 
             // Calculate new block ID
-            uint blockId = (uint)Math.Ceiling((double)stream.Length / (double)blockSize);
+            uint blockId = (uint)Math.Ceiling((double)_stream.Length / (double)_blockSize);
 
             // Extend length of underlying stream
-            stream.SetLength((long)((blockId * blockSize) + blockSize));
-            stream.Flush();
+            _stream.SetLength((long)((blockId * _blockSize) + _blockSize));
+            _stream.Flush();
 
             // Return new block
-            Block newBlock = new Block(this, blockId, new byte[DiskSectorSize], stream);
+            Block newBlock = new Block(
+                storage: this,
+                id: blockId,
+                firstSector: new byte[DiskSectorSize],
+                stream: _stream
+            );
             OnBlockInitialized(newBlock);
             
             return newBlock;
@@ -78,20 +93,25 @@ namespace CustomDatabase.Logic
         public IBlock Find(uint blockId)
         {
             // Search from initialized block
-            if (blocks.ContainsKey(blockId))
-            { return blocks[blockId]; }
+            if (_blocks.ContainsKey(blockId))
+            {
+                return _blocks[blockId];
+            }
 
             // Move to the initialized block or return NULL if it doesn't exist
-            long blockPosition = blockId * blockSize;
-            if ((blockPosition + blockSize) > stream.Length)
-            { return null; }
+            long blockPosition = blockId * _blockSize;
+
+            if ((blockPosition + _blockSize) > _stream.Length)
+            {
+                return null;
+            }
 
             // Read the first 4KB of the block to construct a block from it
             byte[] firstSector = new byte[DiskSectorSize];
-            stream.Position = blockId * blockSize;
-            stream.Read(firstSector, 0, DiskSectorSize);
+            _stream.Position = blockId * _blockSize;
+            _stream.Read(buffer: firstSector, offset: 0, count: DiskSectorSize);
 
-            var newBlock = new Block(this, blockId, firstSector, stream);
+            var newBlock = new Block(storage: this, id: blockId, firstSector: firstSector, stream: _stream);
             OnBlockInitialized(newBlock);
 
             return newBlock;
@@ -102,7 +122,7 @@ namespace CustomDatabase.Logic
         protected virtual void OnBlockInitialized(Block block)
         {
             // Keep reference to initialized block
-            blocks[block.Id] = block;
+            _blocks[block.Id] = block;
 
             // Remove from memory when block is disposed
             block.Disposed += HandleBlockDisposed;
@@ -115,7 +135,7 @@ namespace CustomDatabase.Logic
             block.Disposed -= HandleBlockDisposed;
 
             // Remove block from memory
-            blocks.Remove(block.Id);
+            _blocks.Remove(block.Id);
         }
         #endregion Methods (protected)
     }

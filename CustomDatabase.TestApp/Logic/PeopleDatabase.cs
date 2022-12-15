@@ -1,8 +1,8 @@
 using CustomDatabase.Logic;
-using CustomDatabase.Logic.Tree;
-using TestApp.Models;
+using CustomDatabase.Logic;
+using CustomDatabase.TestApp.Models;
 
-namespace TestApp.Logic
+namespace CustomDatabase.TestApp.Logic
 {
     class PeopleDatabase : IDisposable
     {

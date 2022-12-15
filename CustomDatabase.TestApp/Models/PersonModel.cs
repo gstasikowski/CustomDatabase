@@ -1,4 +1,4 @@
-namespace TestApp.Models
+namespace CustomDatabase.TestApp.Models
 {
     public class PersonModel
     {

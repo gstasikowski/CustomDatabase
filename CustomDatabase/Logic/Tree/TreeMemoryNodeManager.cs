@@ -1,6 +1,6 @@
 using CustomDatabase.Interfaces;
 
-namespace CustomDatabase.Logic.Tree
+namespace CustomDatabase.Logic
 {
     public class TreeMemoryNodeManager<K, V> : ITreeNodeManager<K, V>
     {

@@ -5,7 +5,9 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomDatabase", "CustomDatabase\CustomDatabase.csproj", "{5839794E-C8CE-40FD-B0E4-550BC2C913C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{1C1DDB83-D5A7-418E-AB85-A38C3059A3F7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomDatabase.TestApp", "CustomDatabase.TestApp\CustomDatabase.TestApp.csproj", "{1C1DDB83-D5A7-418E-AB85-A38C3059A3F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomDatabase.UnitTests", "CustomDatabase.UnitTests\CustomDatabase.UnitTests.csproj", "{13B584A4-06A9-4B8D-A1FE-69F25147E925}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +26,9 @@ Global
 		{1C1DDB83-D5A7-418E-AB85-A38C3059A3F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C1DDB83-D5A7-418E-AB85-A38C3059A3F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C1DDB83-D5A7-418E-AB85-A38C3059A3F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13B584A4-06A9-4B8D-A1FE-69F25147E925}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13B584A4-06A9-4B8D-A1FE-69F25147E925}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13B584A4-06A9-4B8D-A1FE-69F25147E925}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13B584A4-06A9-4B8D-A1FE-69F25147E925}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

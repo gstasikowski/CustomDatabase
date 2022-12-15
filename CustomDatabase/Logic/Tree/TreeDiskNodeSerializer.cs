@@ -1,7 +1,7 @@
 using CustomDatabase.Interfaces;
 using CustomDatabase.Helpers;
 
-namespace CustomDatabase.Logic.Tree
+namespace CustomDatabase.Logic
 {
     public sealed class TreeDiskNodeSerializer<K, V>
     {

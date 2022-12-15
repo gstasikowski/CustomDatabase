@@ -1,7 +1,7 @@
 using CustomDatabase.Helpers;
 using CustomDatabase.Interfaces;
 
-namespace CustomDatabase.Logic.Tree
+namespace CustomDatabase.Logic
 {
     public class TreeIntSerializer : ISerializer<uint>
     {

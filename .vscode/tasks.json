@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/TestApp/TestApp.csproj",
+                "${workspaceFolder}/CustomDatabase.TestApp/CustomDatabase.TestApp.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/TestApp/TestApp.csproj",
+                "${workspaceFolder}/CustomDatabase.TestApp/CustomDatabase.TestApp.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/TestApp/TestApp.csproj"
+                "${workspaceFolder}/CustomDatabase.TestApp/CustomDatabase.TestApp.csproj"
             ],
             "problemMatcher": "$msCompile"
         }

@@ -2,7 +2,7 @@ using CustomDatabase.Helpers;
 using CustomDatabase.Interfaces;
 using System.Collections;
 
-namespace CustomDatabase.Logic.Tree
+namespace CustomDatabase.Logic
 {
     public class TreeTraverser<K, V> : IEnumerable<Tuple<K, V>>
     {

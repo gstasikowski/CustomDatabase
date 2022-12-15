@@ -2,7 +2,7 @@ using CustomDatabase.Exceptions;
 using CustomDatabase.Helpers;
 using CustomDatabase.Interfaces;
 
-namespace CustomDatabase.Logic.Tree
+namespace CustomDatabase.Logic
 {
     public class Tree<K, V> : IIndex<K, V>
     {

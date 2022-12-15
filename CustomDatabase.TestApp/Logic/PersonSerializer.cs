@@ -1,7 +1,7 @@
 using CustomDatabase.Helpers;
-using TestApp.Models;
+using CustomDatabase.TestApp.Models;
 
-namespace TestApp.Logic
+namespace CustomDatabase.TestApp.Logic
 {
     public class PersonSerializer
     {

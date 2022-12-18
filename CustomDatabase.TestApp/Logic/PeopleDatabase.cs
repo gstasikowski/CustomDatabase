@@ -1,5 +1,4 @@
 using CustomDatabase.Logic;
-using CustomDatabase.Logic;
 using CustomDatabase.TestApp.Models;
 
 namespace CustomDatabase.TestApp.Logic
@@ -7,6 +6,7 @@ namespace CustomDatabase.TestApp.Logic
     class PeopleDatabase : IDisposable
     {
         #region Variables
+        const int BlockSize = 4096;
         private readonly Stream _mainDatabaseFile;
         private readonly Stream _primaryIndexFile;
         private readonly Stream _secondaryIndexFile;
@@ -30,26 +30,26 @@ namespace CustomDatabase.TestApp.Logic
                 mode: FileMode.OpenOrCreate,
                 access: FileAccess.ReadWrite,
                 share: FileShare.None,
-                bufferSize: 4096
+                bufferSize: BlockSize
             );
             this._primaryIndexFile = new FileStream(
                 path: pathToDBFile + ".pidx",
                 mode: FileMode.OpenOrCreate,
                 access: FileAccess.ReadWrite,
                 share: FileShare.None,
-                bufferSize: 4096
+                bufferSize: BlockSize
             );
             this._secondaryIndexFile = new FileStream(
                 path: pathToDBFile + ".sidx",
                 mode: FileMode.OpenOrCreate,
                 access: FileAccess.ReadWrite,
                 share: FileShare.None,
-                bufferSize: 4096
+                bufferSize: BlockSize
             );
 
             // Create a RecordStorage for main cow data
             this._peopleRecords = new RecordStorage(
-                new BlockStorage(storage: this._mainDatabaseFile, blockSize: 4096, blockHeaderSize: 48));
+                new BlockStorage(storage: this._mainDatabaseFile, blockSize: BlockSize, blockHeaderSize: 48));
 
             // Create the indexes
             this._primaryIndex = new Tree<Guid, uint>(
@@ -57,7 +57,7 @@ namespace CustomDatabase.TestApp.Logic
                     keySerializer: new GuidSerializer(),
                     valueSerializer: new TreeUIntSerializer(),
                     nodeStorage: new RecordStorage(
-                        new BlockStorage(storage: this._primaryIndexFile, blockSize: 4096)
+                        new BlockStorage(storage: this._primaryIndexFile, blockSize: BlockSize)
                     )
                 ),
                 allowDuplicateKeys: false
@@ -68,7 +68,7 @@ namespace CustomDatabase.TestApp.Logic
 					keySerializer: new StringSerializer(), 
 					valueSerializer: new TreeUIntSerializer(), 
 					nodeStorage: new RecordStorage(
-                        new BlockStorage(storage: this._secondaryIndexFile, blockSize: 4096))
+                        new BlockStorage(storage: this._secondaryIndexFile, blockSize: BlockSize))
                 ),
                 allowDuplicateKeys: true
             );

@@ -57,7 +57,9 @@ namespace CustomDatabase.Logic
         public override int Read(byte[] buffer, int offset, int count)
         {
             if ((_readLimit - _position) == 0)
-            { return 0; }
+            {
+                return 0;
+            }
 
             int read = _parent.Read(
                 buffer: buffer,

@@ -179,10 +179,13 @@ namespace CustomDatabase.UnitTests
 			Assert.True((from node in testTree.LessThan(keyToCheck) select node.Item1).SequenceEqual(expectedResult));
 		}
 
+		[Fact]
 		public void Should_throw_key_exists_exception()
 		{
+			PopulateTree(4);
+
 			Assert.Throws<TreeKeyExistsException>(delegate {
-				testTree.Insert(key: 7, value: "duplicate element");
+				testTree.Insert(key: 2, value: "duplicate element");
 			});
 		}
     }

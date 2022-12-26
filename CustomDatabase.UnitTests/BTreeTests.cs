@@ -26,6 +26,7 @@ namespace CustomDatabase.UnitTests
 		public virtual void Should_return_element_number_from_largerThan(int keyToCheck, int expectedResult){}
 		public virtual void Should_return_element_number_from_lessThanOrEqual(int keyToCheck, int expectedResult){}
 		public virtual void Should_return_element_number_from_lessThan(int keyToCheck, int expectedResult){}
+		public virtual void Should_delete_entry_properly(){}
 	}
 
 	public class When_testing_empty_unique_tree : BTreeTestBase
@@ -180,6 +181,15 @@ namespace CustomDatabase.UnitTests
 		}
 
 		[Fact]
+		public override void Should_delete_entry_properly()
+		{
+			PopulateTree(10);
+			testTree.Delete(5);
+
+			Assert.True(testTree.GetAll().Count() < 10);
+		}
+
+		[Fact]
 		public void Should_throw_key_exists_exception()
 		{
 			PopulateTree(4);
@@ -273,6 +283,15 @@ namespace CustomDatabase.UnitTests
 			PopulateTree(5);
 			
 			Assert.True((from node in testTree.LessThanOrEqualTo(keyToCheck) select node.Item1).SequenceEqual(expectedResult));
+		}
+
+		[Fact]
+		public override void Should_delete_entry_properly()
+		{
+			PopulateTree(10);
+			testTree.Delete(5);
+
+			Assert.True(testTree.GetAll().Count() < 10);
 		}
 
 		[Fact]

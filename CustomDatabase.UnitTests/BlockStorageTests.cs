@@ -16,11 +16,6 @@ namespace CustomDatabase.UnitTests
 			_testBlocks = new List<Block>();
 		}
 
-		private void CreateBlockStorage()
-		{
-			_storage = new BlockStorage(_memoryStream);
-		}
-
 		private void PrepareFirstBlockStorage(int count)
 		{
 			for (int index = 0; index < count; index++)

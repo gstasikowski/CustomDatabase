@@ -24,7 +24,7 @@ namespace CustomDatabase.Logic
                 throw new ArgumentNullException("storage");
             }
 
-            this._storage = storage;
+            _storage = storage;
 
             if (storage.BlockHeaderSize < 48)
             {
@@ -106,7 +106,7 @@ namespace CustomDatabase.Logic
                         }
                     }
 
-                    currentBlock = this._storage.Find(nextBlockId);
+                    currentBlock = _storage.Find(nextBlockId);
 
                     if (currentBlock == null)
                     {

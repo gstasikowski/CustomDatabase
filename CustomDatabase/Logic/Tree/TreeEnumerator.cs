@@ -46,10 +46,10 @@ namespace CustomDatabase.Logic
             TreeTraverseDirection direction
         )
         {
-            this._nodeManager = nodeManager;
-            this._currentNode = node;
-            this._currentEntry = fromIndex;
-            this._direction = direction;
+            _nodeManager = nodeManager;
+            _currentNode = node;
+            _currentEntry = fromIndex;
+            _direction = direction;
         }
         #endregion Constructor
 
@@ -61,7 +61,7 @@ namespace CustomDatabase.Logic
                 return false;
             }
 
-            switch (this._direction)
+            switch (_direction)
             {
                 case TreeTraverseDirection.Ascending:
                     return MoveForward();

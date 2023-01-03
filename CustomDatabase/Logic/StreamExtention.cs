@@ -73,11 +73,13 @@ namespace CustomDatabase.Logic
         /// Similar to Stream.CopyTo but with option to inject a delegate
         /// to receive feedback (for loading bars etc).
         /// </summary>
-        public static void CopyTo(this Stream source,
+        public static void CopyTo(
+            this Stream source,
             Stream destination,
             int bufferSize = 4096,
             Func<long, bool> feedback = null,
-            long maxLength = 0)
+            long maxLength = 0
+        )
         {
             var buffer = new byte[bufferSize];
             var totalRead = 0L;

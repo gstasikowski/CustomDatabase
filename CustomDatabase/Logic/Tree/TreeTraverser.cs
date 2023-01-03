@@ -26,10 +26,10 @@ namespace CustomDatabase.Logic
                 throw new ArgumentNullException("fromNode");
             }
 
-            this._nodeManager = nodeManager;
-            this._fromNode = fromNode;
-            this._fromIndex = fromIndex;
-            this._direction = direction;
+            _nodeManager = nodeManager;
+            _fromNode = fromNode;
+            _fromIndex = fromIndex;
+            _direction = direction;
         }
         #endregion Constructor
 

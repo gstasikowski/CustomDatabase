@@ -51,9 +51,14 @@ namespace CustomDatabase.Logic
         public TreeDiskNodeManager(
             ISerializer<K> keySerializer,
             ISerializer<V> valueSerializer,
-            IRecordStorage nodeStorage)
-            : this (keySerializer, valueSerializer, nodeStorage, Comparer<K>.Default
+            IRecordStorage nodeStorage
         )
+        : this (
+                keySerializer,
+                valueSerializer,
+                nodeStorage,
+                Comparer<K>.Default
+            )
         { }
 
         /// <summary>
@@ -75,14 +80,14 @@ namespace CustomDatabase.Logic
                 throw new ArgumentNullException("nodeStorage");
             }
 
-            this._serializer = new TreeDiskNodeSerializer<K, V>(
+            _serializer = new TreeDiskNodeSerializer<K, V>(
                 nodeManager: this,
                 keySerializer: keySerializer,
                 valueSerializer: valueSerializer
             );
-            this._recordStorage = recordStorage;
-            this.KeyComparer = keyComparer;
-            this.EntryComparer = Comparer<Tuple<K, V>>.Create((a, b) =>
+            _recordStorage = recordStorage;
+            KeyComparer = keyComparer;
+            EntryComparer = Comparer<Tuple<K, V>>.Create((a, b) =>
                 { return KeyComparer.Compare(x: a.Item1, y: b.Item1); });
 
             // The first record of nodeStorage contains ID of root node.
@@ -91,11 +96,11 @@ namespace CustomDatabase.Logic
 
             if (firstBlockData != null)
             {
-                this._rootNode = Find(BufferHelper.ReadBufferUInt32(buffer: firstBlockData, bufferOffset: 0));
+                _rootNode = Find(BufferHelper.ReadBufferUInt32(buffer: firstBlockData, bufferOffset: 0));
             }
             else
             {
-                this._rootNode = CreateFirstRoot();
+                _rootNode = CreateFirstRoot();
             }
         }
         #endregion Constructors
@@ -116,7 +121,7 @@ namespace CustomDatabase.Logic
                     );
                 OnNodeInitialized(node);
 
-                return this._serializer.Serialize(node);
+                return _serializer.Serialize(node);
             });
 
             if (node == null)
@@ -153,7 +158,7 @@ namespace CustomDatabase.Logic
                 return null;
             }
 
-            var deserializedNode = this._serializer.Deserialize(assignId: id, record: data);
+            var deserializedNode = _serializer.Deserialize(assignId: id, record: data);
 
             OnNodeInitialized(deserializedNode);
             
@@ -167,15 +172,15 @@ namespace CustomDatabase.Logic
                 childrenIds: new uint[] { leftNodeId, rightNodeId }
                 );
 
-            this._rootNode = node;
+            _rootNode = node;
             _recordStorage.Update(recordId: 1u, data: LittleEndianByteOrder.GetBytes(node.Id));
 
-            return this._rootNode;
+            return _rootNode;
         }
 
         public void MakeRoot(TreeNode<K, V> node)
         {
-            this._rootNode = node;
+            _rootNode = node;
             _recordStorage.Update(recordId: 1u, data: LittleEndianByteOrder.GetBytes(node.Id));
         }
 
@@ -206,7 +211,7 @@ namespace CustomDatabase.Logic
         {
             foreach (var kv in _dirtyNodes)
             {
-                _recordStorage.Update(recordId: kv.Value.Id, data: this._serializer.Serialize(kv.Value));
+                _recordStorage.Update(recordId: kv.Value.Id, data: _serializer.Serialize(kv.Value));
             }
 
             _dirtyNodes.Clear();
@@ -241,12 +246,12 @@ namespace CustomDatabase.Logic
             }
 
             // Clean up weak refs
-            if (this._cleanupCounter++ >= 1000)
+            if (_cleanupCounter++ >= 1000)
             {
-                this._cleanupCounter = 0;
+                _cleanupCounter = 0;
                 var toBeDeleted = new List<uint>();
 
-                foreach (var kv in this._nodeWeakRefs)
+                foreach (var kv in _nodeWeakRefs)
                 {
                     TreeNode<K, V> target;
 
@@ -258,7 +263,7 @@ namespace CustomDatabase.Logic
 
                 foreach (var key in toBeDeleted)
                 {
-                    this._nodeWeakRefs.Remove(key);
+                    _nodeWeakRefs.Remove(key);
                 }
             }
         }

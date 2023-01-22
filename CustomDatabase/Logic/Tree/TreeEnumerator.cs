@@ -2,7 +2,7 @@ using CustomDatabase.Helpers;
 using CustomDatabase.Interfaces;
 using System.Collections;
 
-namespace CustomDatabase.Logic.Tree
+namespace CustomDatabase.Logic
 {
     public class TreeEnumerator<K, V> : IEnumerator<Tuple<K, V>>
     {
@@ -46,10 +46,10 @@ namespace CustomDatabase.Logic.Tree
             TreeTraverseDirection direction
         )
         {
-            this._nodeManager = nodeManager;
-            this._currentNode = node;
-            this._currentEntry = fromIndex;
-            this._direction = direction;
+            _nodeManager = nodeManager;
+            _currentNode = node;
+            _currentEntry = fromIndex;
+            _direction = direction;
         }
         #endregion Constructor
 
@@ -61,7 +61,7 @@ namespace CustomDatabase.Logic.Tree
                 return false;
             }
 
-            switch (this._direction)
+            switch (_direction)
             {
                 case TreeTraverseDirection.Ascending:
                     return MoveForward();

@@ -2,7 +2,7 @@ using CustomDatabase.Helpers;
 using CustomDatabase.Interfaces;
 using System.Collections;
 
-namespace CustomDatabase.Logic.Tree
+namespace CustomDatabase.Logic
 {
     public class TreeTraverser<K, V> : IEnumerable<Tuple<K, V>>
     {
@@ -26,10 +26,10 @@ namespace CustomDatabase.Logic.Tree
                 throw new ArgumentNullException("fromNode");
             }
 
-            this._nodeManager = nodeManager;
-            this._fromNode = fromNode;
-            this._fromIndex = fromIndex;
-            this._direction = direction;
+            _nodeManager = nodeManager;
+            _fromNode = fromNode;
+            _fromIndex = fromIndex;
+            _direction = direction;
         }
         #endregion Constructor
 

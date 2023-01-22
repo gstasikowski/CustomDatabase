@@ -1,6 +1,6 @@
 using CustomDatabase.Interfaces;
 
-namespace CustomDatabase.Logic.Tree
+namespace CustomDatabase.Logic
 {
     public class TreeMemoryNodeManager<K, V> : ITreeNodeManager<K, V>
     {
@@ -41,12 +41,12 @@ namespace CustomDatabase.Logic.Tree
         /// <param name="keyComparer">Key comparer.</param>
         public TreeMemoryNodeManager(ushort minEntriesCountPerNode, IComparer<K> keyComparer)
         {
-            this._minEntriesCountPerNode = minEntriesCountPerNode;
-            this._keyComparer = keyComparer;
-            this._entryComparer = Comparer<Tuple<K, V>>.Create((t1, t2) =>
-            { return this._keyComparer.Compare(x: t1.Item1, y: t2.Item1); });
+            _minEntriesCountPerNode = minEntriesCountPerNode;
+            _keyComparer = keyComparer;
+            _entryComparer = Comparer<Tuple<K, V>>.Create((t1, t2) =>
+            { return _keyComparer.Compare(x: t1.Item1, y: t2.Item1); });
 
-            this._rootNode = Create(entries: null, childrenIds: null);
+            _rootNode = Create(entries: null, childrenIds: null);
         }
         #endregion Constructor
 
@@ -55,7 +55,7 @@ namespace CustomDatabase.Logic.Tree
         {
             var newNode = new TreeNode<K, V>(
                 nodeManager: this,
-                id: (uint)(this._idCounter++),
+                id: (uint)(_idCounter++),
                 parentId: 0,
                 entries: entries,
                 childrenIds: childrenIds
@@ -83,7 +83,7 @@ namespace CustomDatabase.Logic.Tree
                 childrenIds: new uint[] { leftNodeId, rightNodeId }
             );
 
-            this._rootNode = newNode;
+            _rootNode = newNode;
 
             return newNode;
         }
@@ -103,7 +103,7 @@ namespace CustomDatabase.Logic.Tree
 
         public void MakeRoot(TreeNode<K, V> target)
         {
-            this._rootNode = target;
+            _rootNode = target;
         }
 
         public void MarkAsChanged(TreeNode<K, V> target)

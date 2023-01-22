@@ -1,7 +1,7 @@
 using CustomDatabase.Helpers;
 using CustomDatabase.Interfaces;
 
-namespace TestApp.Logic
+namespace CustomDatabase.TestApp.Logic
 {
     public class GuidSerializer : ISerializer<Guid>
     {

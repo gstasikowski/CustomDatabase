@@ -1,7 +1,7 @@
 using CustomDatabase.Interfaces;
 using CustomDatabase.Helpers;
 
-namespace CustomDatabase.Logic.Tree
+namespace CustomDatabase.Logic
 {
     public sealed class TreeDiskNodeSerializer<K, V>
     {
@@ -33,9 +33,9 @@ namespace CustomDatabase.Logic.Tree
                 throw new ArgumentNullException("valueSerializer");
             }
 
-            this._nodeManager = nodeManager;
-            this._keySerializer = keySerializer;
-            this._valueSerializer = valueSerializer;
+            _nodeManager = nodeManager;
+            _keySerializer = keySerializer;
+            _valueSerializer = valueSerializer;
         }
         #endregion Constructor
 
@@ -85,7 +85,7 @@ namespace CustomDatabase.Logic.Tree
         #region Methods (private)
         private byte[] FixedLengthSerialize(TreeNode<K, V> node)
         {
-            int entrySize = this._keySerializer.Length + this._valueSerializer.Length;
+            int entrySize = _keySerializer.Length + _valueSerializer.Length;
             int size = 16 + (node.Entries.Length * entrySize) + (node.ChildrenIds.Length * 4);
 
             if (size >= (1024 * 64))
@@ -110,18 +110,18 @@ namespace CustomDatabase.Logic.Tree
                 var entry = node.GetEntry(index);
 
                 Buffer.BlockCopy(
-                    src: this._keySerializer.Serialize(entry.Item1),
+                    src: _keySerializer.Serialize(entry.Item1),
                     srcOffset: 0,
                     dst: buffer,
                     dstOffset: 12 + (index * entrySize),
-                    count: this._keySerializer.Length
+                    count: _keySerializer.Length
                 );
                 Buffer.BlockCopy(
-                    src: this._valueSerializer.Serialize(entry.Item2),
+                    src: _valueSerializer.Serialize(entry.Item2),
                     srcOffset: 0,
                     dst: buffer,
-                    dstOffset: 12 + (index * entrySize) + this._keySerializer.Length,
-                    count: this._valueSerializer.Length
+                    dstOffset: 12 + (index * entrySize) + _keySerializer.Length,
+                    count: _valueSerializer.Length
                 );
             }
 
@@ -142,7 +142,7 @@ namespace CustomDatabase.Logic.Tree
 
         private TreeNode<K, V> FixedLengthDeserialize(uint assignId, byte[] buffer)
         {
-            int entrySize = this._keySerializer.Length + this._valueSerializer.Length;
+            int entrySize = _keySerializer.Length + _valueSerializer.Length;
 
             // First 4 bytes of uint32 are parentID of this node.
             uint parentId = BufferHelper.ReadBufferUInt32(buffer: buffer, bufferOffset: 0);
@@ -158,15 +158,15 @@ namespace CustomDatabase.Logic.Tree
 
             for (int index = 0; index < entriesCount; index++)
             {
-                var key = this._keySerializer.Deserialize(
+                var key = _keySerializer.Deserialize(
                     buffer: buffer,
                     offset: 12 + (index * entrySize),
-                    length: this._keySerializer.Length
+                    length: _keySerializer.Length
                 );
-                var value = this._valueSerializer.Deserialize(
+                var value = _valueSerializer.Deserialize(
                     buffer: buffer,
-                    offset: 12 + (index * entrySize) + this._keySerializer.Length,
-                    length: this._valueSerializer.Length
+                    offset: 12 + (index * entrySize) + _keySerializer.Length,
+                    length: _valueSerializer.Length
                 );
 
                 entries[index] = new Tuple<K, V>(item1: key, item2: value);
@@ -222,8 +222,8 @@ namespace CustomDatabase.Logic.Tree
                 for (int index = 0; index < node.EntriesCount; index++)
                 {
                     var entry = node.GetEntry(index);
-                    var key = this._keySerializer.Serialize(entry.Item1);
-                    var value = this._valueSerializer.Serialize(entry.Item2);
+                    var key = _keySerializer.Serialize(entry.Item1);
+                    var value = _valueSerializer.Serialize(entry.Item2);
 
                     memorystream.Write(
                         buffer: LittleEndianByteOrder.GetBytes((int)key.Length),
@@ -268,15 +268,15 @@ namespace CustomDatabase.Logic.Tree
             for (int index = 0; index < entriesCount; index++)
             {
                 var keyLength = BufferHelper.ReadBufferUInt32(buffer: buffer, bufferOffset: offset);
-                var key = this._keySerializer.Deserialize(
+                var key = _keySerializer.Deserialize(
                     buffer: buffer,
                     offset: offset + 4,
                     length: (int)keyLength
                 );
-                var value = this._valueSerializer.Deserialize(
+                var value = _valueSerializer.Deserialize(
                     buffer: buffer,
                     offset: offset + 4 + (int)keyLength,
-                    length: this._valueSerializer.Length
+                    length: _valueSerializer.Length
                 );
 
                 entries[index] = new Tuple<K, V>(item1: key, item2: value);

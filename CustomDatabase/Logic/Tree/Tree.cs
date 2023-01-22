@@ -2,7 +2,7 @@ using CustomDatabase.Exceptions;
 using CustomDatabase.Helpers;
 using CustomDatabase.Interfaces;
 
-namespace CustomDatabase.Logic.Tree
+namespace CustomDatabase.Logic
 {
     public class Tree<K, V> : IIndex<K, V>
     {
@@ -20,8 +20,8 @@ namespace CustomDatabase.Logic.Tree
                 throw new ArgumentNullException("nodeManager");
             }
 
-            this._nodeManager = nodeManager;
-            this._allowDuplicateKeys = allowDuplicateKeys;
+            _nodeManager = nodeManager;
+            _allowDuplicateKeys = allowDuplicateKeys;
         }
         #endregion Constructor
 
@@ -178,7 +178,7 @@ namespace CustomDatabase.Logic.Tree
             int startIterationIndex = 0;
             var node = FindNodeForIteration(
                 key: key,
-                node: this._nodeManager.RootNode,
+                node: _nodeManager.RootNode,
                 moveLeft: true,
                 startIterationIndex: ref startIterationIndex
             );
@@ -201,7 +201,7 @@ namespace CustomDatabase.Logic.Tree
             int startIterationIndex = 0;
             var node = FindNodeForIteration(
                 key: key,
-                node: this._nodeManager.RootNode,
+                node: _nodeManager.RootNode,
                 moveLeft: false,
                 startIterationIndex: ref startIterationIndex
             );
@@ -224,7 +224,7 @@ namespace CustomDatabase.Logic.Tree
             int startIterationIndex = 0;
             var node = FindNodeForIteration(
                 key: key,
-                node: this._nodeManager.RootNode,
+                node: _nodeManager.RootNode,
                 moveLeft: false,
                 startIterationIndex: ref startIterationIndex
             );
@@ -247,7 +247,7 @@ namespace CustomDatabase.Logic.Tree
             int startIterationIndex = 0;
             var node = FindNodeForIteration(
                 key: key,
-                node: this._nodeManager.RootNode,
+                node: _nodeManager.RootNode,
                 moveLeft: true,
                 startIterationIndex: ref startIterationIndex
             );

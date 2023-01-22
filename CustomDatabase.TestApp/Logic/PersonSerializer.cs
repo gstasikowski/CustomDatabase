@@ -1,10 +1,16 @@
 using CustomDatabase.Helpers;
-using TestApp.Models;
+using CustomDatabase.TestApp.Models;
 
-namespace TestApp.Logic
+namespace CustomDatabase.TestApp.Logic
 {
     public class PersonSerializer
     {
+        const int GuidIdLength = 16;
+        const int FirstNameLength = 4;
+        const int LastNameLength = 4;
+        const int EmailLength = 4;
+        const int PhoneNumberLength = 4;
+
         public byte[] Serialize(PersonModel person)
         {
             byte[] firstNameBytes = System.Text.Encoding.UTF8.GetBytes(person.FirstName);
@@ -12,15 +18,15 @@ namespace TestApp.Logic
             byte[] emailBytes = System.Text.Encoding.UTF8.GetBytes(person.Email);
             byte[] phoneNumberBytes = System.Text.Encoding.UTF8.GetBytes(person.PhoneNumber);
             byte[] personData = new byte[
-                16 +                    // 16 bytes for Guid ID
-                4 +                     // 4 bytes indicate the length of first name string
-                firstNameBytes.Length + // n bytes for first name string
-                4 +                     // 4 bytes indicate the length of the last name string
-                lastNameBytes.Length +  // z bytes for last name
-                4 +                     // 4 bytes indicate length of email string
-                emailBytes.Length +     // y bytes of email string
-                4 +                     // 4 bytes indicate length of phone number string
-                phoneNumberBytes.Length // x bytes of phone number string
+                GuidIdLength +
+                FirstNameLength +
+                firstNameBytes.Length +
+                LastNameLength +
+                lastNameBytes.Length +
+                EmailLength +
+                emailBytes.Length +
+                PhoneNumberLength +
+                phoneNumberBytes.Length
                 ];
 
             int offset = 0;
@@ -31,7 +37,7 @@ namespace TestApp.Logic
                 srcOffset: 0,
                 dst: personData,
                 dstOffset: offset,
-                count: 16
+                count: GuidIdLength
                 );
 
             offset = 16;
@@ -42,7 +48,7 @@ namespace TestApp.Logic
                 srcOffset: 0,
                 dst: personData,
                 dstOffset: offset,
-                count: 4
+                count: FirstNameLength
                 );
 
             offset += 4;
@@ -63,7 +69,7 @@ namespace TestApp.Logic
                 srcOffset: 0,
                 dst: personData,
                 dstOffset: offset,
-                count: 4
+                count: LastNameLength
                 );
 
             offset += 4;
@@ -84,7 +90,7 @@ namespace TestApp.Logic
                 srcOffset: 0,
                 dst: personData,
                 dstOffset: offset,
-                count: 4
+                count: EmailLength
                 );
 
             offset += 4;
@@ -105,7 +111,7 @@ namespace TestApp.Logic
                 srcOffset: 0,
                 dst: personData,
                 dstOffset: offset,
-                count: 4
+                count: PhoneNumberLength
                 );
 
             offset += 4;
@@ -128,11 +134,11 @@ namespace TestApp.Logic
 
             // ID
             personModel.Id = BufferHelper.ReadBufferGuid(buffer: data, bufferOffset: offset);
-            offset = 16;
+            offset = GuidIdLength;
 
             // First name
             int firstNameLength = BufferHelper.ReadBufferInt32(buffer: data, bufferOffset: offset);
-            offset += 4;
+            offset += FirstNameLength;
 
             if (firstNameLength < 0 || firstNameLength > (16 * 1024))
             {
@@ -150,7 +156,7 @@ namespace TestApp.Logic
 
             // Last name
             int lastNameLength = BufferHelper.ReadBufferInt32(buffer: data, bufferOffset: offset);
-            offset += 4;
+            offset += LastNameLength;
 
             if (lastNameLength < 0 || lastNameLength > (16 * 1024))
             {
@@ -167,7 +173,7 @@ namespace TestApp.Logic
 
             // Email
             int emailLength = BufferHelper.ReadBufferInt32(buffer: data, bufferOffset: offset);
-            offset += 4;
+            offset += EmailLength;
 
             if (emailLength < 0 || emailLength > (16 * 1024))
             {
@@ -185,7 +191,7 @@ namespace TestApp.Logic
 
             // Phone number
             int phoneNumberLength = BufferHelper.ReadBufferInt32(buffer: data, bufferOffset: offset);
-            offset += 4;
+            offset += PhoneNumberLength;
 
             if (phoneNumberLength < 0 || phoneNumberLength > (16 * 1024))
             {

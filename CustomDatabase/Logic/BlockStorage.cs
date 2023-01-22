@@ -53,11 +53,11 @@ namespace CustomDatabase.Logic
                 throw new ArgumentException("blockSize too small");
             }
 
-            this._blockContentSize = blockSize - blockHeaderSize;
-            this._blockHeaderSize = blockHeaderSize;
-            this._blockSize = blockSize;
-            this._unitOfWork = (blockSize >= 4096) ? 4096 : 128;
-            this._stream = storage;
+            _blockContentSize = blockSize - blockHeaderSize;
+            _blockHeaderSize = blockHeaderSize;
+            _blockSize = blockSize;
+            _unitOfWork = (blockSize >= 4096) ? 4096 : 128;
+            _stream = storage;
         }
         #endregion Constructors
 

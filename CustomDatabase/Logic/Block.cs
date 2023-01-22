@@ -45,10 +45,10 @@ namespace CustomDatabase.Logic
                 );
             }
 
-            this._storage = storage;
-            this._id = id;
-            this._firstSector = firstSector;
-            this._stream = stream;
+            _storage = storage;
+            _id = id;
+            _firstSector = firstSector;
+            _stream = stream;
         }
         #endregion Constructor
 
@@ -102,7 +102,9 @@ namespace CustomDatabase.Logic
         public void Read(byte[] destination, int destinationOffset, int sourceOffset, int count)
         {
             if (_isDisposed)
-            { throw new ObjectDisposedException("Block"); }
+            {
+                throw new ObjectDisposedException("Block");
+            }
 
             // Validate argument
             if (false == ((count >= 0) && ((count + sourceOffset) <= _storage.BlockContentSize)))
@@ -223,7 +225,7 @@ namespace CustomDatabase.Logic
             if ((_storage.BlockHeaderSize + destinationOffset + count) > _storage.DiskSectorSize)
             {
                 // Move stream to correct position in prep for writing
-                this._stream.Position = (Id * _storage.BlockSize) + Math.Max(
+                _stream.Position = (Id * _storage.BlockSize) + Math.Max(
                     val1: _storage.DiskSectorSize,
                     val2: _storage.BlockHeaderSize + destinationOffset
                 );
@@ -243,8 +245,8 @@ namespace CustomDatabase.Logic
                 while (written < count)
                 {
                     int bytesToWrite = Math.Min(val1: 4096, val2: count - written);
-                    this._stream.Write(buffer: source, offset: sourceOffset + written, count: bytesToWrite);
-                    this._stream.Flush();
+                    _stream.Write(buffer: source, offset: sourceOffset + written, count: bytesToWrite);
+                    _stream.Flush();
                     written += bytesToWrite;
                 }
             }
@@ -303,9 +305,9 @@ namespace CustomDatabase.Logic
 
                 if (_isFirstSectorDirty)
                 {
-                    this._stream.Position = Id * _storage.BlockSize;
-                    this._stream.Write(buffer: _firstSector, offset: 0, count: 4096);
-                    this._stream.Flush();
+                    _stream.Position = Id * _storage.BlockSize;
+                    _stream.Write(buffer: _firstSector, offset: 0, count: 4096);
+                    _stream.Flush();
                     _isFirstSectorDirty = false;
                 }
 

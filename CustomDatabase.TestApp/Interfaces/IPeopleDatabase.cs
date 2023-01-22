@@ -1,6 +1,6 @@
-using TestApp.Models;
+using CustomDatabase.TestApp.Models;
 
-namespace TestApp.Interfaces
+namespace CustomDatabase.TestApp.Interfaces
 {
     public interface IPeopleDatabase
     {

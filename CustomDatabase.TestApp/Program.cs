@@ -1,7 +1,7 @@
-﻿using TestApp.Logic;
-using TestApp.Models;
+﻿using CustomDatabase.TestApp.Logic;
+using CustomDatabase.TestApp.Models;
 
-namespace TestApp
+namespace CustomDatabase.TestApp
 {
     class Program
     {
